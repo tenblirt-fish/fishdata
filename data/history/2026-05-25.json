@@ -1,6 +1,5 @@
 {
-  "generated_at": "2026-05-25T02:13:11.379096+00:00",
-  "generated_at_msk": "2026-05-25T02:13:11.379109+00:00",
+  "generated_at": "2026-05-25T02:30:08.505837+00:00",
   "season": 2026,
   "forecast_2026": {
     "total_run_million_fish": 45.32,
@@ -8,43 +7,40 @@
       31.12,
       59.52
     ],
-    "source": "ADF&G 2026 Bristol Bay Sockeye Forecast (Nov 2025)",
-    "source_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf",
-    "notes": "Прогноз на 26% ниже среднего за последние 10 лет (61M), но на 21% выше долгосрочного среднего (37.4M)"
+    "source": "ADF&G 2026 Bristol Bay Sockeye Forecast"
   },
   "bluesheet": {
-    "season_active": true,
-    "pdf_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1760976706.pdf",
-    "note": "Blue Sheet загружен",
-    "file_size_kb": 289.7
+    "url": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyfisherysalmon.bluesheet",
+    "available": true,
+    "note": "Blue Sheet сохранён как PDF (29 KB)",
+    "file_size_kb": 29.9
   },
   "news": [
     {
       "source": "Undercurrent News",
-      "title": "Alaska summer salmon season opens with high-value Copper River harvest",
       "link": "https://www.undercurrentnews.com/2026/05/22/alaska-summer-salmon-season-opens-with-high-value-copper-river-harvest/",
       "published": "Fri, 22 May 2026 16:28:15 +0000",
-      "summary": "While dwarfed by the much larger Bristol Bay sockeye runs, the Copper River harvest is much earlier and heralds the opening of Alaska's summer wild salmon season",
-      "numbers_found": []
+      "title_en": "Alaska summer salmon season opens with high-value Copper River harvest",
+      "summary_en": "While dwarfed by the much larger Bristol Bay sockeye runs, the Copper River harvest is much earlier and heralds the opening of Alaska's summer wild salmon season",
+      "title_ru": "Летний сезон лосося на Аляске открывается ценным уловом в Коппер-Ривер",
+      "summary_ru": "Несмотря на то, что урожай нерки в Бристольском заливе затмевается гораздо более крупными участками нерки в Бристольском заливе, сбор урожая на Коппер-Ривер происходит намного раньше и знаменует открытие летнего сезона дикого лосося на Аляске.",
+      "title_ja": "アラスカのサマーサーモンシーズンは、高価値のカッパーリバーの収穫で幕を開ける",
+      "summary_ja": "はるかに大規模なブリストル湾のベニザケの遡上に比べれば小さく見えますが、コッパー川の収穫ははるかに早く、アラスカの夏の天然サケシーズンの始まりを告げます。"
     },
     {
       "source": "Undercurrent News",
-      "title": "UCN proposes launch of new US wholesale price reporting for salmon roe",
       "link": "https://www.undercurrentnews.com/2026/05/22/ucn-proposes-launch-of-new-us-wholesale-price-reporting-for-salmon-roe-2/",
       "published": "Fri, 22 May 2026 13:25:02 +0000",
-      "summary": "This proposed launch reflects increasing interest in benchmark pricing for Alaska salmon roe amid evolving global supply dynamics, fluctuating Japanese demand trends and broader volatility across salmon commodity markets",
-      "numbers_found": []
-    }
-  ],
-  "press_releases": [
-    {
-      "title": "ADF&G Programs",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=managementprograms.main"
+      "title_en": "UCN proposes launch of new US wholesale price reporting for salmon roe",
+      "summary_en": "This proposed launch reflects increasing interest in benchmark pricing for Alaska salmon roe amid evolving global supply dynamics, fluctuating Japanese demand trends and broader volatility across salmon commodity markets",
+      "title_ru": "UCN предлагает запустить новую отчетность по оптовым ценам на икру лосося в США",
+      "summary_ru": "Предлагаемый запуск отражает растущий интерес к эталонным ценам на икру лосося Аляски на фоне меняющейся динамики глобального предложения, колебаний тенденций спроса в Японии и более широкой волатильности на товарных рынках лосося.",
+      "title_ja": "UCN、米国におけるイクラの新たな卸売価格報告の開始を提案",
+      "summary_ja": "この導入提案は、世界的な供給力学の進化、日本の需要動向の変動、サケ商品市場全体の変動の拡大の中で、アラスカ産イクラのベンチマーク価格への関心の高まりを反映している。"
     }
   ],
   "stats": {
     "news_count": 2,
-    "press_releases_count": 1,
     "bluesheet_available": true
   }
 }
