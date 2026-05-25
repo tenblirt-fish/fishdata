@@ -1,1 +1,25 @@
+{
+  "generated_at": "2026-05-24T06:00:00+00:00",
+  "season": 2026,
+  "forecast_2026": {
+    "total_run_million_fish": 45.32,
+    "range_million_fish": [31.12, 59.52],
+    "source": "ADF&G 2026 Bristol Bay Sockeye Forecast",
+    "source_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf"
+  },
+  "bluesheet": {
+    "page_url": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon",
+    "pdf_url": null,
+    "season_active": false
+  },
+  "bluesheet_data": { "parsed": false, "districts": {}, "totals": {} },
+  "news": [],
+  "press_releases": [],
+  "stats": {
+    "news_count": 0,
+    "press_releases_count": 0,
+    "bluesheet_available": false,
+    "note": "Это стартовый файл. Первый реальный запуск произойдёт в 06:00 UTC (09:00 МСК) на следующий день после публикации репозитория."
+  }
+}
 
