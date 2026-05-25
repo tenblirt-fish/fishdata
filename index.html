@@ -486,16 +486,16 @@ function renderBlueSheet(bs) {
   const info = document.getElementById('blue-sheet-info');
   const btn = document.getElementById('blue-sheet-btn');
 
-  if (bs?.pdf_url) {
+  if (bs?.available) {
     info.innerHTML = `
       <div style="opacity: 0.9; font-size: 0.9rem;">
-        ${t('seasonActive')} · ${t('fileSize')}: ${bs.file_size_kb} KB · ${t('downloadedAt')}: ${formatDate(bs.downloaded_at)}
+        ${bs.note}
       </div>
     `;
     btn.href = 'data/blue-sheet.pdf';
     btn.classList.remove('btn-disabled');
   } else {
-    info.innerHTML = `<div style="opacity: 0.9; font-size: 0.9rem;">${t('seasonInactive')}</div>`;
+    info.innerHTML = `<div style="opacity: 0.9; font-size: 0.9rem;">${bs?.note || t('seasonInactive')}</div>`;
     btn.classList.add('btn-disabled');
   }
 }
@@ -526,20 +526,19 @@ function renderNews(news) {
     return;
   }
 
+  const lang = localStorage.getItem('preferred_lang') || 'ru';
+
   container.innerHTML = news.map(item => {
-    const numbersHtml = item.numbers_found && Object.keys(item.numbers_found).length > 0
-      ? Object.values(item.numbers_found).flat().map(n =>
-          `<span class="numbers-badge">📊 ${n}</span>`
-        ).join('')
-      : '';
+    // Выбираем заголовок и описание по языку
+    const title = lang === 'ja' ? (item.title_ja || item.title_en) : (item.title_ru || item.title_en);
+    const summary = lang === 'ja' ? (item.summary_ja || item.summary_en) : (item.summary_ru || item.summary_en);
 
     return `
       <div class="news-item">
         <span class="source-badge">${item.source}</span>
-        <a href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
+        <a href="${item.link}" target="_blank" rel="noopener">${title}</a>
         <div class="news-meta">${formatDate(item.published)}</div>
-        ${item.summary ? `<div class="news-summary">${item.summary}</div>` : ''}
-        ${numbersHtml}
+        ${summary ? `<div class="news-summary">${summary}</div>` : ''}
       </div>
     `;
   }).join('');
