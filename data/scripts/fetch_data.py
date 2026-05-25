@@ -1,15 +1,6 @@
 """
 Сбор ежедневных данных по вылову нерки на Аляске (сезон 2026).
-
-Источники:
-- ADF&G Bristol Bay Bluesheet — оперативные данные по вылову
-- ADF&G press releases — пресс-релизы по сезону
-- BBRSDA — рыночные данные
-- SeafoodSource RSS — отраслевые новости
-- KDLG — местные новости Bristol Bay
-- Japan Customs / Tridge — японский рынок (если найдены свежие)
-
-Запускается через GitHub Actions ежедневно в 06:00 UTC (= 09:00 МСК).
+Версия 2.0 — улучшенный сбор новостей, японские источники.
 """
 
 import json
@@ -31,44 +22,43 @@ DATA_DIR = ROOT / "data"
 HISTORY_DIR = DATA_DIR / "history"
 
 # URL источников
-ADFG_BLUESHEET_PAGE = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon"
-ADFG_NEWS_PAGE = "https://www.adfg.alaska.gov/index.cfm?adfg=pressreleases.main"
+ADFG_BRISTOL_BAY = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon"
+ADFG_HARVEST_SUMMARY = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon_harvest"
+ADFG_NEWS = "https://www.adfg.alaska.gov/index.cfm?adfg=pressreleases.main"
 BBRSDA_UPDATES = "https://www.bbrsda.com/updates/"
 
-# RSS новостных источников
-NEWS_FEEDS = [
+# RSS новостных источников (английские)
+NEWS_FEEDS_EN = [
     ("SeafoodSource", "https://www.seafoodsource.com/rss/news"),
     ("Undercurrent News", "https://www.undercurrentnews.com/feed/"),
-    ("KDLG", "https://www.kdlg.org/feed"),
+    ("KDLG Bristol Bay", "https://www.kdlg.org/feed"),
     ("Alaska Public Media", "https://alaskapublic.org/feed/"),
     ("IntraFish", "https://www.intrafish.com/rss"),
+    ("National Fisherman", "https://www.nationalfisherman.com/rss"),
+    ("Alaska Beacon", "https://alaskabeacon.com/feed/"),
 ]
 
-# Ключевые слова для фильтрации новостей (RU + EN + JA)
-KEYWORDS = [
-    # English
+# Японские источники (если есть RSS)
+NEWS_FEEDS_JA = [
+    ("みなと新聞 (Minato Shimbun)", "https://www.minato-yamaguchi.co.jp/rss/rss.xml"),
+]
+
+# Ключевые слова для фильтрации (расширенный список)
+KEYWORDS_EN = [
     "sockeye", "bristol bay", "alaska salmon", "red salmon",
     "salmon harvest", "salmon season", "salmon price", "salmon export",
-    "adf&g", "bbrsda", "ex-vessel",
-    # Russian
-    "нерка", "брист", "аляск",
-    # Japanese
-    "ベニサケ", "紅鮭", "サケ", "鮭", "アラスカ", "ブリストル",
+    "adf&g", "bbrsda", "ex-vessel", "salmon forecast", "salmon run",
+    "nushagak", "kvichak", "egegik", "ugashik", "togiak",
+    "chinook", "king salmon", "chum salmon",
 ]
 
-# Регексы для извлечения цифр вылова из текста
-HARVEST_PATTERNS = [
-    # "harvest of 41.2 million sockeye"
-    re.compile(r"harvest(?:ed)?\s+(?:of\s+)?(\d+(?:\.\d+)?)\s*million\s+sockeye", re.IGNORECASE),
-    # "41.2 million fish"
-    re.compile(r"(\d+(?:\.\d+)?)\s*million\s+(?:sockeye|salmon|fish)", re.IGNORECASE),
-    # "cumulative catch of 12,345,678"
-    re.compile(r"cumulative\s+(?:catch|harvest)\s+of\s+([\d,]+)", re.IGNORECASE),
-    # "$1.30 per pound" / "$1.30/lb"
-    re.compile(r"\$(\d+\.\d{2})\s*(?:per\s+pound|/lb|/pound)", re.IGNORECASE),
-]
+KEYWORDS_RU = ["нерка", "брист", "аляск", "лосось", "путина"]
 
-USER_AGENT = "Mozilla/5.0 (compatible; AlaskaSockeyeMonitor/1.0; +https://github.com)"
+KEYWORDS_JA = ["ベニサケ", "紅鮭", "サケ", "鮭", "アラスカ", "ブリストル", "漁獲"]
+
+ALL_KEYWORDS = KEYWORDS_EN + KEYWORDS_RU + KEYWORDS_JA
+
+USER_AGENT = "Mozilla/5.0 (compatible; AlaskaSockeyeMonitor/2.0)"
 TIMEOUT = 30
 
 
@@ -77,7 +67,7 @@ TIMEOUT = 30
 # ============================================================
 
 def http_get(url, **kwargs):
-    """GET с таймаутом, юзер-агентом и обработкой ошибок."""
+    """GET с обработкой ошибок."""
     headers = kwargs.pop("headers", {})
     headers.setdefault("User-Agent", USER_AGENT)
     try:
@@ -85,177 +75,69 @@ def http_get(url, **kwargs):
         response.raise_for_status()
         return response
     except requests.RequestException as e:
-        print(f"  ⚠️  Ошибка загрузки {url}: {e}", file=sys.stderr)
+        print(f"  ⚠️  Ошибка {url}: {e}", file=sys.stderr)
         return None
 
 
 def is_relevant(text):
-    """Содержит ли текст ключевые слова по нерке."""
+    """Проверка релевантности по ключевым словам."""
     if not text:
         return False
     text_lower = text.lower()
-    return any(kw in text_lower for kw in KEYWORDS)
+    return any(kw.lower() in text_lower for kw in ALL_KEYWORDS)
 
 
 def extract_numbers(text):
-    """Извлечь все числовые показатели из текста."""
+    """Извлечение цифр из текста."""
     if not text:
-        return {}
-
-    numbers = {}
-    for pattern in HARVEST_PATTERNS:
-        matches = pattern.findall(text)
-        if matches:
-            key = pattern.pattern.split("\\")[0][:30]
-            numbers[key] = matches[:5]  # макс 5 совпадений
-    return numbers
+        return []
+    
+    numbers = []
+    
+    # Вылов в миллионах
+    for match in re.finditer(r"(\d+(?:\.\d+)?)\s*million\s+(?:sockeye|salmon|fish)", text, re.I):
+        numbers.append(f"{match.group(1)}M fish")
+    
+    # Цены за фунт
+    for match in re.finditer(r"\$(\d+\.\d{2})\s*(?:per\s+pound|/lb)", text, re.I):
+        numbers.append(f"${match.group(1)}/lb")
+    
+    # Общая стоимость
+    for match in re.finditer(r"\$(\d+(?:\.\d+)?)\s*million", text, re.I):
+        numbers.append(f"${match.group(1)}M")
+    
+    return numbers[:5]  # макс 5
 
 
 # ============================================================
-# Сборщики данных
+# Сбор новостей
 # ============================================================
-
-def fetch_bluesheet_links():
-    """
-    Найти ссылки на актуальные blue sheets на сайте ADF&G.
-    Bluesheet публикуется ежедневно в сезон путины (июнь–август).
-    """
-    print("📋 Ищу актуальный Blue Sheet на ADF&G...")
-    result = {
-        "page_url": ADFG_BLUESHEET_PAGE,
-        "pdf_url": None,
-        "downloaded_at": None,
-        "file_size_kb": None,
-        "season_active": False,
-    }
-
-    response = http_get(ADFG_BLUESHEET_PAGE)
-    if not response:
-        return result
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    # Ищем все ссылки на PDF которые содержат "blue" / "bluesheet" / "daily"
-    pdf_links = []
-    for link in soup.find_all("a", href=True):
-        href = link["href"]
-        text = link.get_text(strip=True).lower()
-        if href.lower().endswith(".pdf") and (
-            "blue" in href.lower() or "blue" in text or "daily" in text or "bluesheet" in href.lower()
-        ):
-            full_url = href if href.startswith("http") else f"https://www.adfg.alaska.gov{href}"
-            pdf_links.append({"url": full_url, "text": link.get_text(strip=True)})
-
-    if not pdf_links:
-        print("  ℹ️  Blue Sheet PDF не найден (вне сезона или формат изменился)")
-        return result
-
-    # Скачиваем первый найденный (обычно самый свежий)
-    pdf_url = pdf_links[0]["url"]
-    print(f"  📥 Скачиваю: {pdf_url}")
-    pdf_response = http_get(pdf_url)
-
-    if pdf_response:
-        pdf_path = DATA_DIR / "blue-sheet.pdf"
-        pdf_path.write_bytes(pdf_response.content)
-        result["pdf_url"] = pdf_url
-        result["downloaded_at"] = datetime.now(timezone.utc).isoformat()
-        result["file_size_kb"] = round(len(pdf_response.content) / 1024, 1)
-        result["season_active"] = True
-        result["all_links_found"] = pdf_links[:5]
-        print(f"  ✅ Сохранён: {result['file_size_kb']} KB")
-
-    return result
-
-
-def parse_bluesheet_pdf():
-    """
-    Извлечь цифры из скачанного blue sheet PDF.
-    Использует pdfplumber для парсинга таблиц.
-    """
-    pdf_path = DATA_DIR / "blue-sheet.pdf"
-    if not pdf_path.exists():
-        return {"parsed": False, "reason": "PDF не скачан"}
-
-    try:
-        import pdfplumber
-    except ImportError:
-        return {"parsed": False, "reason": "pdfplumber не установлен"}
-
-    print("🔍 Парсю Blue Sheet PDF...")
-    extracted = {
-        "parsed": True,
-        "districts": {},
-        "totals": {},
-        "raw_text_preview": "",
-    }
-
-    try:
-        with pdfplumber.open(pdf_path) as pdf:
-            full_text = ""
-            for page in pdf.pages:
-                page_text = page.extract_text() or ""
-                full_text += page_text + "\n"
-
-            extracted["raw_text_preview"] = full_text[:2000]
-
-            # Извлечь цифры по районам Bristol Bay
-            districts = ["Naknek-Kvichak", "Egegik", "Ugashik", "Nushagak", "Togiak"]
-            for district in districts:
-                # Ищем строки вида "Naknek-Kvichak 1,234,567"
-                pattern = rf"{district}[^\d]*([\d,]+)"
-                match = re.search(pattern, full_text, re.IGNORECASE)
-                if match:
-                    try:
-                        value = int(match.group(1).replace(",", ""))
-                        extracted["districts"][district] = value
-                    except ValueError:
-                        pass
-
-            # Общий итог
-            total_match = re.search(r"total[^\d]*([\d,]+)", full_text, re.IGNORECASE)
-            if total_match:
-                try:
-                    extracted["totals"]["bristol_bay_cumulative"] = int(
-                        total_match.group(1).replace(",", "")
-                    )
-                except ValueError:
-                    pass
-
-            # Извлечь все «million sockeye» упоминания
-            extracted["mentions"] = extract_numbers(full_text)
-
-            print(f"  ✅ Извлечено районов: {len(extracted['districts'])}")
-    except Exception as e:
-        extracted["parsed"] = False
-        extracted["error"] = str(e)
-        print(f"  ⚠️  Ошибка парсинга: {e}")
-
-    return extracted
-
 
 def fetch_news():
-    """Собрать релевантные новости из RSS-лент."""
+    """Собрать новости из RSS."""
     print("📰 Собираю новости...")
     all_news = []
-
-    for source_name, feed_url in NEWS_FEEDS:
+    
+    all_feeds = NEWS_FEEDS_EN + NEWS_FEEDS_JA
+    
+    for source_name, feed_url in all_feeds:
         try:
             parsed = feedparser.parse(feed_url)
-            count_for_source = 0
-            for entry in parsed.entries[:25]:
+            count = 0
+            
+            for entry in parsed.entries[:30]:
                 title = entry.get("title", "")
                 summary = entry.get("summary", "") or entry.get("description", "")
-
+                
                 if not is_relevant(title + " " + summary):
                     continue
-
-                # Очистка HTML из summary
-                summary_clean = BeautifulSoup(summary, "html.parser").get_text()[:400]
-
+                
+                # Очистка HTML
+                summary_clean = BeautifulSoup(summary, "html.parser").get_text()[:500]
+                
                 # Извлечение цифр
-                numbers = extract_numbers(title + " " + summary)
-
+                numbers = extract_numbers(title + " " + summary_clean)
+                
                 all_news.append({
                     "source": source_name,
                     "title": title,
@@ -264,42 +146,88 @@ def fetch_news():
                     "summary": summary_clean,
                     "numbers_found": numbers,
                 })
-                count_for_source += 1
-
-            print(f"  {source_name}: {count_for_source} релевантных")
+                count += 1
+            
+            if count > 0:
+                print(f"  ✅ {source_name}: {count} новостей")
         except Exception as e:
             print(f"  ⚠️  {source_name}: {e}")
-
-    # Сортировка по дате (свежие первыми)
+    
+    # Сортировка по дате
     all_news.sort(key=lambda x: x.get("published", ""), reverse=True)
-    return all_news[:30]  # топ-30
+    return all_news[:40]
 
 
-def fetch_adfg_press_releases():
+def fetch_adfg_press():
     """Скрапинг пресс-релизов ADF&G."""
     print("🏛  Проверяю пресс-релизы ADF&G...")
     releases = []
-
-    response = http_get(ADFG_NEWS_PAGE)
+    
+    response = http_get(ADFG_NEWS)
     if not response:
         return releases
-
+    
     soup = BeautifulSoup(response.text, "html.parser")
-
-    # ADF&G обычно использует таблицу или список ссылок
+    
     for link in soup.find_all("a", href=True)[:100]:
         text = link.get_text(strip=True)
-        href = link["href"]
-        if not text or len(text) < 15:
+        if len(text) < 10:
             continue
         if is_relevant(text):
+            href = link["href"]
             full_url = href if href.startswith("http") else f"https://www.adfg.alaska.gov{href}"
             releases.append({"title": text, "link": full_url})
-            if len(releases) >= 10:
+            if len(releases) >= 15:
                 break
-
-    print(f"  ✅ Найдено релизов: {len(releases)}")
+    
+    print(f"  ✅ Найдено: {len(releases)}")
     return releases
+
+
+# ============================================================
+# Blue Sheet
+# ============================================================
+
+def fetch_bluesheet():
+    """Попытка скачать Blue Sheet."""
+    print("📋 Ищу Blue Sheet...")
+    
+    result = {
+        "season_active": False,
+        "pdf_url": None,
+        "note": "Межсезонье. Blue Sheet публикуется с ~22 июня по август.",
+    }
+    
+    # Проверяем основную страницу Bristol Bay
+    response = http_get(ADFG_BRISTOL_BAY)
+    if not response:
+        return result
+    
+    soup = BeautifulSoup(response.text, "html.parser")
+    
+    # Ищем PDF-ссылки
+    for link in soup.find_all("a", href=True):
+        href = link["href"]
+        text = link.get_text(strip=True).lower()
+        
+        if href.lower().endswith(".pdf") and ("outlook" in text or "bluesheet" in href.lower() or "2026" in text):
+            full_url = href if href.startswith("http") else f"https://www.adfg.alaska.gov{href}"
+            
+            # Скачиваем
+            pdf_response = http_get(full_url)
+            if pdf_response:
+                pdf_path = DATA_DIR / "blue-sheet.pdf"
+                pdf_path.write_bytes(pdf_response.content)
+                
+                result["season_active"] = True
+                result["pdf_url"] = full_url
+                result["file_size_kb"] = round(len(pdf_response.content) / 1024, 1)
+                result["note"] = "Blue Sheet загружен"
+                print(f"  ✅ Скачан: {result['file_size_kb']} KB")
+                return result
+    
+    print("  ℹ️  Blue Sheet не найден (вне сезона)")
+    return result
 
 
 # ============================================================
@@ -307,19 +235,18 @@ def fetch_adfg_press_releases():
 # ============================================================
 
 def main():
-    print("=" * 60)
-    print(f"🐟 Alaska Sockeye Daily Update — {datetime.now(timezone.utc).isoformat()}")
-    print("=" * 60)
-
+    print("=" * 70)
+    print(f"🐟 Alaska Sockeye Daily Update v2.0 — {datetime.now(timezone.utc).isoformat()}")
+    print("=" * 70)
+    
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
-
-    bluesheet_info = fetch_bluesheet_links()
-    bluesheet_data = parse_bluesheet_pdf() if bluesheet_info["pdf_url"] else {"parsed": False}
+    
     news = fetch_news()
-    press_releases = fetch_adfg_press_releases()
-
-    # Итоговая структура данных
+    press_releases = fetch_adfg_press()
+    bluesheet = fetch_bluesheet()
+    
+    # Итоговая структура
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "generated_at_msk": datetime.now(timezone.utc).astimezone().isoformat(),
@@ -327,20 +254,20 @@ def main():
         "forecast_2026": {
             "total_run_million_fish": 45.32,
             "range_million_fish": [31.12, 59.52],
-            "source": "ADF&G 2026 Bristol Bay Sockeye Forecast",
+            "source": "ADF&G 2026 Bristol Bay Sockeye Forecast (Nov 2025)",
             "source_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf",
+            "notes": "Прогноз на 26% ниже среднего за последние 10 лет (61M), но на 21% выше долгосрочного среднего (37.4M)"
         },
-        "bluesheet": bluesheet_info,
-        "bluesheet_data": bluesheet_data,
+        "bluesheet": bluesheet,
         "news": news,
         "press_releases": press_releases,
         "stats": {
             "news_count": len(news),
             "press_releases_count": len(press_releases),
-            "bluesheet_available": bool(bluesheet_info["pdf_url"]),
+            "bluesheet_available": bluesheet["season_active"],
         },
     }
-
+    
     # Сохраняем latest.json
     latest_path = DATA_DIR / "latest.json"
     latest_path.write_text(
@@ -348,8 +275,8 @@ def main():
         encoding="utf-8",
     )
     print(f"\n💾 Сохранён: {latest_path}")
-
-    # Архив по дате
+    
+    # Архив
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     archive_path = HISTORY_DIR / f"{date_str}.json"
     archive_path.write_text(
@@ -357,11 +284,12 @@ def main():
         encoding="utf-8",
     )
     print(f"💾 Архив: {archive_path}")
-
-    print("\n" + "=" * 60)
+    
+    print("\n" + "=" * 70)
     print(f"✅ Готово. Новостей: {len(news)} | Релизов: {len(press_releases)}")
-    print("=" * 60)
+    print("=" * 70)
 
 
 if __name__ == "__main__":
     main()
+   
