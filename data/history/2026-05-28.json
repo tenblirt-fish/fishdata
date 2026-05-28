@@ -1,85 +1,104 @@
 {
-  "generated_at": "2026-05-28T06:10:22.407547+00:00",
+  "generated_at": "2026-05-28T06:34:20.404209+00:00",
   "season": 2026,
   "forecast_2026": {
     "total_run_million_fish": 45.32,
+    "harvestable_million_fish": 32.3,
     "range_million_fish": [
       31.12,
       59.52
-    ],
-    "source": "ADF&G 2026 Bristol Bay Sockeye Forecast"
-  },
-  "harvest_by_district": {
-    "Naknek-Kvichak": null,
-    "Egegik": null,
-    "Ugashik": null,
-    "Nushagak": null,
-    "Togiak": null
-  },
-  "news": {
-    "harvest": [],
-    "price": [
-      {
-        "source": "Undercurrent News",
-        "category": "price",
-        "link": "https://www.undercurrentnews.com/2026/05/27/chiles-coho-farmer-salmones-aysen-deepens-vap-strategy-beyond-japan-hg-shipments/",
-        "published": "Wed, 27 May 2026 21:04:13 +0000",
-        "title_en": "Chile’s coho farmer Salmones Aysen deepens VAP strategy beyond Japan H&G shipments",
-        "summary_en": "'The issue is H&G. That product is more exposed to price competition' -- Jorge Guzman Espinola, Salmones Aysen",
-        "title_ru": "Чилийский фермер Салмонес Айсен расширяет стратегию VAP за пределы поставок H&G в Японию",
-        "summary_ru": "«Проблема в H&G. Этот продукт более подвержен ценовой конкуренции», — Хорхе Гусман Эспинола, Salmones Aysen.",
-        "title_ja": "チリのコーホーファーマー、サルモーネス・アイセンが日本H&G出荷を超えてVAP戦略を深化",
-        "summary_ja": "「問題はH&Gです。その製品は価格競争にさらされています」 -- ホルヘ・グスマン・エスピノーラ、サルモーネス・アイセン"
-      },
-      {
-        "source": "Undercurrent News",
-        "category": "price",
-        "link": "https://www.undercurrentnews.com/2026/05/27/ecuadorian-shrimp-to-china-largely-stable-in-week-22-as-metabisulfite-issue-eases/",
-        "published": "Wed, 27 May 2026 16:53:16 +0000",
-        "title_en": "Ecuador shrimp prices for China in doldrums even as metabisulfite issue eases",
-        "summary_en": "CFR China offers for the benchmark 30-40 semi-IQF Ecuador HOSO shrimp product remain unchanged week-on-week at a low level with price falls seen elsewhere, after as many as 100 containers were rejected or returned in May due to metabisulfite residue",
-        "title_ru": "Цены на эквадорскую креветку для Китая находятся в упадке, хотя проблема метабисульфита ослабевает",
-        "summary_ru": "CFR Китай предлагает эталонные 30-40 полу-IQF Эквадорские креветки HOSO остаются неизменными еженедельно на низком уровне, при этом в других местах наблюдается падение цен после того, как в мае около 100 контейнеров были отклонены или возвращены из-за остатков метабисульфита.",
-        "title_ja": "メタ重亜硫酸塩問題が緩和しても、中国向けエクアドルのエビ価格は低迷",
-        "summary_ja": "メタ重亜硫酸塩残留により5月に最大100個のコンテナが拒否または返品された後、ベンチマークとなる30～40のセミIQFエクアドルHOSOエビ製品に対するCFR中国のオファーは、他の地域で見られた価格下落を伴い、前週比変わらず低水準にある"
-      },
-      {
-        "source": "Undercurrent News",
-        "category": "price",
-        "link": "https://www.undercurrentnews.com/2026/05/27/week-22-us-wholesale-prices-lower-cost-shrimp-shifts-market-alaska-wild-salmon-season-begins/",
-        "published": "Wed, 27 May 2026 16:15:08 +0000",
-        "title_en": "Week 22 US wholesale prices: Lower-cost shrimp shifts market; Alaska wild salmon season begins",
-        "summary_en": "UCN's week 22 price assessments and market wrap-ups for US wholesale prices for crab, crabmeat, salmon, shrimp, lobster, groundfish, farmed whitefish and scallops are available on our pricing platform",
-        "title_ru": "Оптовые цены в США на 22-й неделе: рынок более дешевых креветок меняется; На Аляске начинается сезон дикого лосося",
-        "summary_ru": "На нашей ценовой платформе доступны оценки цен UCN за 22-ю неделю и рыночные обзоры оптовых цен в США на крабов, крабовое мясо, лосося, креветок, омаров, донную рыбу, выращенного на фермах сига и морские гребешки.",
-        "title_ja": "第 22 週 米国卸売価格：低コストのエビが市場を変える。アラスカ産野生サーモンのシーズンが始まる",
-        "summary_ja": "カニ、カニ肉、サーモン、エビ、ロブスター、グラウンドフィッシュ、養殖白身魚、ホタテ貝の米国卸売価格に関するUCNの第22週の価格評価と市場まとめは、当社の価格設定プラットフォームで入手できます。"
-      }
-    ],
-    "forecast": [],
-    "season": [
-      {
-        "source": "Alaska Beacon",
-        "category": "season",
-        "link": "https://alaskabeacon.com/2026/05/20/alaska-lng-a-personal-archive/",
-        "published": "Thu, 21 May 2026 01:00:10 +0000",
-        "title_en": "Alaska LNG: A personal archive",
-        "summary_en": "Maybe it’s because of the winter we had, with its lingering cold and back-to-back storms, but I’ve been deep in spring cleaning this season. I’ve always hoarded papers — old handouts, notes and fliers — but I’m not organized enough to know what’s where, so it’s always a bit of a surprise where information shows […]",
-        "title_ru": "Аляска СПГ: личный архив",
-        "summary_ru": "Возможно, это из-за нашей зимы с ее затяжными холодами и непрерывными штормами, но в этом сезоне я углубился в весеннюю уборку. Я всегда копил бумаги — старые рекламные материалы, заметки и листовки — но я недостаточно организован, чтобы знать, что где, поэтому всегда немного удивляюсь, когда информация показывает […]",
-        "title_ja": "Alaska LNG: 個人的なアーカイブ",
-        "summary_ja": "寒さが長く続き、嵐が続いた冬のせいかもしれませんが、この季節は大掃除に夢中になっています。私はいつも古い配布資料、メモ、チラシなどの書類をため込んでいますが、何がどこにあるのか把握できるほど整理整頓ができていないので、情報がどこに表示されるかにいつも少し驚きます。 […]"
-      }
     ]
   },
-  "press_releases": [],
+  "monitoring": {
+    "step_1_bluesheet": {
+      "available": true,
+      "date": "3/23/26",
+      "source_url": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon",
+      "daily_catch_by_district": {},
+      "cumulative_catch": null,
+      "escapement": {},
+      "effort": {
+        "permitted_deliveries": null,
+        "boats_active": null
+      },
+      "comparison": {
+        "vs_forecast_2026": null,
+        "vs_2025": null
+      },
+      "management_actions": [],
+      "last_updated": "2026-05-28T06:34:11.445735+00:00",
+      "note": "Bluesheet актуален"
+    },
+    "step_2_market_data": {
+      "alaska": {
+        "production": {
+          "note": "Объёмы переработки (H&G, филе, икра)",
+          "items": [
+            {
+              "source": "Undercurrent News",
+              "title": "Chile’s coho farmer Salmones Aysen deepens VAP strategy beyond Japan H&G shipments",
+              "summary": "<div><a href=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/202605281.10.38-e1779905718541.png?x60809\" target=\"_blank\"><img src=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/202605281.10.38-e1779905718541-300x162.png?x60809\" /></a></div>'The issue is H&amp;G. That product is more exposed to price competition' -- Jorge Guzman Espinola, Salmones Aysen",
+              "link": "https://www.undercurrentnews.com/2026/05/27/chiles-coho-farmer-salmones-aysen-deepens-vap-strategy-beyond-japan-hg-shipments/"
+            },
+            {
+              "source": "Undercurrent News",
+              "title": "Norway’s Ode begins long-term Southeast Asia retail, foodservice push",
+              "summary": "<div><a href=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/img3531-e1779903614967.jpg?x60809\" target=\"_blank\"><img src=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/img3531-e1779903614967-300x162.jpg?x60809\" /></a></div>'Going through Japanese cuisine first will be an important first step to get cod known in that segment' -- Tone Hellesvik, Ode",
+              "link": "https://www.undercurrentnews.com/2026/05/27/norways-ode-begins-long-term-southeast-asia-retail-foodservice-push/"
+            },
+            {
+              "source": "Undercurrent News",
+              "title": "Ecuador shrimp prices for China in doldrums even as metabisulfite issue eases",
+              "summary": "<div><a href=\"https://www.undercurrentnews.com/wp-content/uploads/2022/11/PXL_20221021_204624660.MP_-2-e1669204126201.jpg?x60809\" target=\"_blank\"><img src=\"https://www.undercurrentnews.com/wp-content/uploads/2022/11/PXL_20221021_204624660.MP_-2-e1669204126201-300x163.jpg?x60809\" /></a></div>CFR China offers for the benchmark 30-40 semi-IQF Ecuador HOSO shrimp product remain unchanged week-on-week ",
+              "link": "https://www.undercurrentnews.com/2026/05/27/ecuadorian-shrimp-to-china-largely-stable-in-week-22-as-metabisulfite-issue-eases/"
+            },
+            {
+              "source": "Undercurrent News",
+              "title": "Week 22 US wholesale prices: Lower-cost shrimp shifts market; Alaska wild salmon season begins",
+              "summary": "<div><a href=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/shutterstock_65235628-e1779895962979.jpg?x60809\" target=\"_blank\"><img src=\"https://www.undercurrentnews.com/wp-content/uploads/2026/05/shutterstock_65235628-e1779895962979-300x163.jpg?x60809\" /></a></div><em>UCN</em>'s week 22 price assessments and market wrap-ups for US wholesale prices for crab, crabmeat, salmon, shrimp, l",
+              "link": "https://www.undercurrentnews.com/2026/05/27/week-22-us-wholesale-prices-lower-cost-shrimp-shifts-market-alaska-wild-salmon-season-begins/"
+            }
+          ]
+        },
+        "prices": {
+          "ex_vessel": null,
+          "wholesale": null,
+          "note": "Цены от Trident, Silver Bay, OBI и др."
+        },
+        "exports": {
+          "note": "Объёмы экспорта в Японию и другие страны",
+          "items": []
+        }
+      },
+      "japan": {
+        "import": {
+          "volume_tons": null,
+          "value_jpy_million": null,
+          "vs_previous_year": null,
+          "note": "Japan Customs данные"
+        },
+        "wholesale_market": {
+          "toyosu_yen_per_kg": null,
+          "hokkaido_salted": null,
+          "note": "Оптовые цены на Toyosu и Hokkaido"
+        },
+        "retail_consumption": {
+          "note": "Ценовые тренды, сезонные факторы (お盆, お歳暮)",
+          "trends": []
+        }
+      },
+      "analytics": {
+        "usd_jpy_rate": null,
+        "logistics_notes": "Таможенные сборы, логистика",
+        "forecast_notes": "Прогнозы на следующий период"
+      }
+    }
+  },
   "stats": {
-    "districts_available": 0,
-    "total_harvest": 0,
-    "news_harvest": 0,
-    "news_price": 3,
-    "news_forecast": 0,
-    "news_season": 1,
-    "press_releases": 0
+    "bluesheet_available": true,
+    "districts_with_data": 0,
+    "total_daily_catch": 0,
+    "cumulative_catch": null,
+    "market_news_count": 4
   }
 }
