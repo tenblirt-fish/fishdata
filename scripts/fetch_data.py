@@ -1,12 +1,14 @@
 """
-Сбор данных по нерке Аляски — финальная версия v4.0
-- Автоматический перевод новостей на русский и японский
-- Скачивание Blue Sheet всей страницы как PDF
+Сбор данных по нерке Аляски — версия v5.0
+- Парсинг таблицы Blue Sheet (вылов по районам)
+- Сбор и перевод свежих новостей по вылову
+- Мониторинг ex-vessel цен, прогнозов, новостей сезона
 """
 
 import json
 import sys
 import time
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -15,11 +17,9 @@ try:
     import requests
     from bs4 import BeautifulSoup
     from deep_translator import GoogleTranslator
-    print("✅ Все библиотеки импортированы успешно")
+    print("✅ Все библиотеки импортированы")
 except ImportError as e:
     print(f"❌ Ошибка импорта: {e}")
-    print("💡 Установите недостающие библиотеки:")
-    print("   pip install deep-translator --break-system-packages")
     sys.exit(1)
 
 # ============================================================
@@ -30,85 +30,160 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 HISTORY_DIR = DATA_DIR / "history"
 
-# Blue Sheet URL
 BLUE_SHEET_URL = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyfisherysalmon.bluesheet"
+ADFG_NEWS = "https://www.adfg.alaska.gov/index.cfm?adfg=pressreleases.main"
 
-# RSS-источники (только английские — будем переводить)
+# RSS источники (только английские)
 RSS_FEEDS = [
     ("SeafoodSource", "https://www.seafoodsource.com/rss/news"),
+    ("BBRSDA", "https://www.bbrsda.com/rss"),
     ("Undercurrent News", "https://www.undercurrentnews.com/feed/"),
-    ("IntraFish", "https://www.intrafish.com/rss"),
-    ("National Fisherman", "https://www.nationalfisherman.com/rss"),
     ("KDLG Bristol Bay", "https://www.kdlg.org/feed"),
+    ("IntraFish", "https://www.intrafish.com/rss"),
     ("Alaska Beacon", "https://alaskabeacon.com/feed/"),
 ]
 
-# Ключевые слова для фильтрации
-KEYWORDS = [
-    "sockeye", "bristol bay", "alaska salmon", "red salmon",
-    "salmon harvest", "salmon season", "salmon price", "salmon forecast",
-    "adf&g", "bbrsda", "ex-vessel", "chinook", "king salmon",
-]
+# Ключевые слова мониторинга (как в Notion скиле)
+KEYWORDS_HARVEST = ["sockeye", "bristol bay", "harvest", "catch", "вылов"]
+KEYWORDS_PRICE = ["ex-vessel", "price", "per pound", "цена", "$/lb"]
+KEYWORDS_FORECAST = ["forecast", "projection", "prediction", "прогноз"]
+KEYWORDS_SEASON = ["season", "opening", "closing", "summary", "сезон"]
 
-USER_AGENT = "Mozilla/5.0 (compatible; AlaskaSockeyeBot/4.0)"
+USER_AGENT = "Mozilla/5.0 (compatible; AlaskaSockeyeMonitor/5.0)"
 TIMEOUT = 25
 
+# Районы Bristol Bay для парсинга
+DISTRICTS = {
+    "Naknek-Kvichak": None,
+    "Egegik": None,
+    "Ugashik": None,
+    "Nushagak": None,
+    "Togiak": None,
+}
+
 
 # ============================================================
-# Функции
+# Функции парсинга Blue Sheet
 # ============================================================
 
-def http_get(url):
-    """HTTP GET с обработкой ошибок."""
+def fetch_bluesheet_html():
+    """Скачать HTML Blue Sheet страницы."""
+    print("\n" + "="*70)
+    print("📋 ПАРСЮ BLUE SHEET (таблица вылова)")
+    print("="*70)
+    
     try:
         headers = {"User-Agent": USER_AGENT}
-        response = requests.get(url, headers=headers, timeout=TIMEOUT)
+        response = requests.get(BLUE_SHEET_URL, headers=headers, timeout=TIMEOUT)
         response.raise_for_status()
-        return response
+        return response.text
     except Exception as e:
-        print(f"  ⚠️  Ошибка {url}: {type(e).__name__}")
+        print(f"  ⚠️  Ошибка загрузки: {e}")
         return None
 
 
-def is_relevant(text):
-    """Проверка релевантности."""
-    if not text:
-        return False
-    text_lower = text.lower()
-    return any(kw.lower() in text_lower for kw in KEYWORDS)
+def parse_bluesheet_table(html):
+    """
+    Парсить таблицу вылова из HTML Blue Sheet.
+    Ищет таблицы с цифрами вылова по районам.
+    """
+    if not html:
+        return DISTRICTS.copy()
+    
+    try:
+        soup = BeautifulSoup(html, "html.parser")
+        
+        # Ищем все таблицы на странице
+        tables = soup.find_all("table")
+        print(f"  📊 Найдено таблиц: {len(tables)}")
+        
+        districts_found = {}
+        
+        for table in tables:
+            rows = table.find_all("tr")
+            for row in rows:
+                cells = row.find_all(["td", "th"])
+                row_text = " ".join([cell.get_text(strip=True) for cell in cells])
+                
+                # Ищем названия районов в строках
+                for district_name in DISTRICTS.keys():
+                    if district_name.lower() in row_text.lower():
+                        # Ищем цифры в этой строке или соседних
+                        numbers = re.findall(r"[\d,]+", row_text)
+                        if numbers:
+                            # Берём первую найденную цифру
+                            value_str = numbers[0].replace(",", "")
+                            try:
+                                value = int(value_str)
+                                districts_found[district_name] = value
+                                print(f"  ✅ {district_name}: {value:,} рыб")
+                            except:
+                                pass
+        
+        if not districts_found:
+            print("  ⚠️  Таблица вылова не найдена (может быть вне сезона)")
+            return DISTRICTS.copy()
+        
+        # Заполняем результат
+        result = DISTRICTS.copy()
+        result.update(districts_found)
+        return result
+        
+    except Exception as e:
+        print(f"  ❌ Ошибка парсинга: {e}")
+        return DISTRICTS.copy()
 
+
+# ============================================================
+# Функции сбора новостей
+# ============================================================
 
 def translate_text(text, target_lang):
-    """
-    Перевод текста через Google Translate (бесплатно).
-    target_lang: 'ru' или 'ja'
-    """
+    """Перевод через Google Translate."""
     if not text or len(text) < 5:
         return text
     
     try:
-        # Ограничиваем длину (Google Translate имеет лимит)
         text_short = text[:1000] if len(text) > 1000 else text
-        
         translator = GoogleTranslator(source='auto', target=target_lang)
         translated = translator.translate(text_short)
-        
-        # Задержка чтобы не словить rate limit
         time.sleep(0.5)
-        
         return translated
     except Exception as e:
-        print(f"  ⚠️  Ошибка перевода на {target_lang}: {e}")
-        return text  # возвращаем оригинал если перевод не удался
+        print(f"  ⚠️  Ошибка перевода: {e}")
+        return text
 
 
-def fetch_news():
-    """Собрать новости и перевести на RU и JA."""
+def is_relevant_news(text, category):
+    """
+    Классифицировать новость по категориям.
+    category: 'harvest', 'price', 'forecast', 'season'
+    """
+    text_lower = text.lower()
+    
+    keywords_map = {
+        "harvest": KEYWORDS_HARVEST,
+        "price": KEYWORDS_PRICE,
+        "forecast": KEYWORDS_FORECAST,
+        "season": KEYWORDS_SEASON,
+    }
+    
+    keywords = keywords_map.get(category, KEYWORDS_HARVEST)
+    return any(kw.lower() in text_lower for kw in keywords)
+
+
+def fetch_news_by_category():
+    """Собрать новости по категориям (как в Notion скиле)."""
     print("\n" + "="*70)
-    print("📰 СОБИРАЮ И ПЕРЕВОЖУ НОВОСТИ")
+    print("📰 СОБИРАЮ И ПЕРЕНОШУ НОВОСТИ (по категориям)")
     print("="*70)
     
-    all_news = []
+    categories = {
+        "harvest": [],      # Вылов, улов
+        "price": [],        # Ex-vessel цены
+        "forecast": [],     # Прогнозы
+        "season": [],       # Новости сезона
+    }
     
     for source_name, feed_url in RSS_FEEDS:
         print(f"\n🔍 {source_name}...")
@@ -120,120 +195,123 @@ def fetch_news():
                 print(f"  ⚠️  Лента пустая")
                 continue
             
-            count = 0
             for entry in parsed.entries[:30]:
                 title = entry.get("title", "").strip()
                 summary = entry.get("summary", "") or entry.get("description", "")
+                link = entry.get("link", "")
+                published = entry.get("published", "") or entry.get("updated", "")
                 
-                if not is_relevant(title + " " + summary):
+                if not title:
                     continue
                 
                 # Очистка HTML
                 try:
-                    summary_clean = BeautifulSoup(summary, "html.parser").get_text()[:500]
+                    summary_clean = BeautifulSoup(summary, "html.parser").get_text()[:600]
                 except:
-                    summary_clean = summary[:500]
+                    summary_clean = summary[:600]
                 
-                print(f"  ✅ {title[:70]}")
-                print(f"     🔄 Перевожу на русский...")
-                title_ru = translate_text(title, 'ru')
-                summary_ru = translate_text(summary_clean, 'ru')
+                full_text = title + " " + summary_clean
                 
-                print(f"     🔄 Перевожу на японский...")
-                title_ja = translate_text(title, 'ja')
-                summary_ja = translate_text(summary_clean, 'ja')
-                
-                all_news.append({
-                    "source": source_name,
-                    "link": entry.get("link", ""),
-                    "published": entry.get("published", "") or entry.get("updated", ""),
-                    "title_en": title,
-                    "summary_en": summary_clean,
-                    "title_ru": title_ru,
-                    "summary_ru": summary_ru,
-                    "title_ja": title_ja,
-                    "summary_ja": summary_ja,
-                })
-                count += 1
-                
-                if count >= 10:  # Лимит 10 новостей на источник
-                    break
-            
-            print(f"  ✅ Собрано и переведено: {count}")
-            
+                # Классифицируем по категориям
+                for category in categories.keys():
+                    if is_relevant_news(full_text, category):
+                        print(f"  ✅ [{category.upper()}] {title[:70]}")
+                        
+                        # Переводим
+                        title_ru = translate_text(title, 'ru')
+                        title_ja = translate_text(title, 'ja')
+                        summary_ru = translate_text(summary_clean, 'ru')
+                        summary_ja = translate_text(summary_clean, 'ja')
+                        
+                        news_item = {
+                            "source": source_name,
+                            "category": category,
+                            "link": link,
+                            "published": published,
+                            "title_en": title,
+                            "summary_en": summary_clean,
+                            "title_ru": title_ru,
+                            "summary_ru": summary_ru,
+                            "title_ja": title_ja,
+                            "summary_ja": summary_ja,
+                        }
+                        
+                        categories[category].append(news_item)
+                        break  # Одна новость — одна категория
+                        
         except Exception as e:
             print(f"  ❌ Ошибка: {e}")
     
-    print(f"\n📊 ВСЕГО: {len(all_news)} новостей")
-    return all_news
+    # Статистика
+    total = sum(len(v) for v in categories.values())
+    print(f"\n📊 ИТОГО новостей: {total}")
+    for cat, news in categories.items():
+        print(f"   {cat}: {len(news)}")
+    
+    return categories
 
 
-def fetch_bluesheet_as_pdf():
-    """
-    Скачать Blue Sheet страницу и сохранить как PDF.
-    Используем простой метод через wkhtmltopdf или сохранение HTML.
-    """
+def fetch_press_releases():
+    """Пресс-релизы ADF&G."""
     print("\n" + "="*70)
-    print("📋 СКАЧИВАЮ BLUE SHEET")
+    print("🏛  ПРЕСС-РЕЛИЗЫ ADF&G")
     print("="*70)
     
-    result = {
-        "url": BLUE_SHEET_URL,
-        "available": False,
-        "note": "Межсезонье или ошибка загрузки",
-    }
-    
-    print(f"URL: {BLUE_SHEET_URL}")
-    
-    response = http_get(BLUE_SHEET_URL)
-    if not response:
-        return result
+    releases = []
     
     try:
-        # Сохраняем HTML-версию
-        html_path = DATA_DIR / "blue-sheet.html"
-        html_path.write_text(response.text, encoding='utf-8')
-        print(f"  ✅ HTML сохранён: {html_path}")
+        headers = {"User-Agent": USER_AGENT}
+        response = requests.get(ADFG_NEWS, headers=headers, timeout=TIMEOUT)
+        soup = BeautifulSoup(response.text, "html.parser")
         
-        # Пытаемся конвертировать в PDF через weasyprint
-        try:
-            from weasyprint import HTML
+        for link in soup.find_all("a", href=True)[:50]:
+            text = link.get_text(strip=True)
+            if len(text) < 15 or not any(kw in text.lower() for kw in ["sockeye", "salmon", "bristol", "нерка"]):
+                continue
             
-            pdf_path = DATA_DIR / "blue-sheet.pdf"
-            HTML(string=response.text, base_url=BLUE_SHEET_URL).write_pdf(pdf_path)
+            href = link["href"]
+            full_url = href if href.startswith("http") else f"https://www.adfg.alaska.gov{href}"
             
-            result["available"] = True
-            result["note"] = f"Blue Sheet сохранён как PDF ({pdf_path.stat().st_size // 1024} KB)"
-            result["file_size_kb"] = round(pdf_path.stat().st_size / 1024, 1)
-            print(f"  ✅ PDF создан: {result['file_size_kb']} KB")
+            releases.append({
+                "title": text,
+                "link": full_url,
+                "title_ru": translate_text(text, 'ru'),
+                "title_ja": translate_text(text, 'ja'),
+            })
             
-        except ImportError:
-            # Если weasyprint не установлен — сохраняем только HTML
-            print("  ⚠️  weasyprint не установлен, сохраняю только HTML")
-            result["available"] = True
-            result["note"] = "Blue Sheet сохранён как HTML (установите weasyprint для PDF)"
+            if len(releases) >= 10:
+                break
         
+        print(f"  ✅ Найдено: {len(releases)}")
     except Exception as e:
         print(f"  ❌ Ошибка: {e}")
     
-    return result
+    return releases
 
+
+# ============================================================
+# Главная функция
+# ============================================================
 
 def main():
     """Главная функция."""
     print("\n" + "="*70)
-    print("🐟 ALASKA SOCKEYE DAILY UPDATE v4.0")
+    print("🐟 ALASKA SOCKEYE DAILY MONITOR v5.0")
     print(f"⏰ {datetime.now(timezone.utc).isoformat()}")
     print("="*70)
     
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
     
-    # Собираем данные
-    news = fetch_news()
-    bluesheet = fetch_bluesheet_as_pdf()
+    # Парсим Blue Sheet
+    html = fetch_bluesheet_html()
+    districts = parse_bluesheet_table(html)
     
-    # Формируем JSON
+    # Собираем новости
+    news_by_category = fetch_news_by_category()
+    press_releases = fetch_press_releases()
+    
+    # Формируем итоговый JSON
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "season": 2026,
@@ -242,11 +320,25 @@ def main():
             "range_million_fish": [31.12, 59.52],
             "source": "ADF&G 2026 Bristol Bay Sockeye Forecast",
         },
-        "bluesheet": bluesheet,
-        "news": news,
+        # Таблица вылова по районам
+        "harvest_by_district": districts,
+        # Новости по категориям (как в Notion)
+        "news": {
+            "harvest": news_by_category.get("harvest", []),      # Вылов
+            "price": news_by_category.get("price", []),          # Ex-vessel цены
+            "forecast": news_by_category.get("forecast", []),    # Прогнозы
+            "season": news_by_category.get("season", []),        # Новости сезона
+        },
+        "press_releases": press_releases,
+        # Статистика
         "stats": {
-            "news_count": len(news),
-            "bluesheet_available": bluesheet["available"],
+            "districts_available": sum(1 for v in districts.values() if v is not None),
+            "total_harvest": sum(v for v in districts.values() if v is not None),
+            "news_harvest": len(news_by_category.get("harvest", [])),
+            "news_price": len(news_by_category.get("price", [])),
+            "news_forecast": len(news_by_category.get("forecast", [])),
+            "news_season": len(news_by_category.get("season", [])),
+            "press_releases": len(press_releases),
         },
     }
     
@@ -271,7 +363,12 @@ def main():
     print(f"✅ {archive_path}")
     
     print("\n" + "="*70)
-    print(f"✅ ГОТОВО! Новостей: {len(news)}")
+    stats = payload["stats"]
+    print(f"✅ ГОТОВО!")
+    print(f"   Районов: {stats['districts_available']}")
+    print(f"   Вылов: {stats['total_harvest']:,} рыб")
+    print(f"   Новостей (вылов/цена/прогноз/сезон): {stats['news_harvest']}/{stats['news_price']}/{stats['news_forecast']}/{stats['news_season']}")
+    print(f"   Пресс-релизов: {stats['press_releases']}")
     print("="*70)
 
 
