@@ -317,14 +317,46 @@
   </a>
 </div>
 
-<!-- ВЫЛОВ ПО РАЙОНАМ -->
+<!-- СТРУКТУРИРОВАННЫЙ МОНИТОРИНГ (как в Notion) -->
 <h2 class="section-title">
-  <span data-lang="ru" class="show">📊 Вылов по районам Bristol Bay</span>
-  <span data-lang="ja">📊 ブリストル湾 地区別漁獲量</span>
+  <span data-lang="ru" class="show">🔴 ШАГ 1: BLUESHEET ADF&G (ПРИОРИТЕТ)</span>
+  <span data-lang="ja">🔴 ステップ1: BLUESHEET ADF&G (優先)</span>
 </h2>
-<div class="card" id="districts-container">
-  <div class="empty" data-lang="ru">Данные появятся после публикации Blue Sheet (сезон стартует ~22 июня)</div>
-  <div class="empty" data-lang="ja">ブルーシート公開後にデータが表示されます (漁期開始 〜6月22日)</div>
+
+<div class="card">
+  <div id="bluesheet-status">—</div>
+  <table class="districts-table" id="bluesheet-table" style="margin-top: 1rem;">
+    <thead>
+      <tr>
+        <th><span data-lang="ru" class="show">Район</span><span data-lang="ja">地区</span></th>
+        <th><span data-lang="ru" class="show">Вылов (рыб)</span><span data-lang="ja">漁獲量 (尾)</span></th>
+      </tr>
+    </thead>
+    <tbody id="bluesheet-tbody"></tbody>
+  </table>
+</div>
+
+<h2 class="section-title">
+  <span data-lang="ru" class="show">🟠 ШАГ 2: ОСТАЛЬНЫЕ ДАННЫЕ</span>
+  <span data-lang="ja">🟠 ステップ2: その他データ</span>
+</h2>
+
+<div class="grid">
+  <div class="card">
+    <h3 style="color: var(--ocean); margin-top: 0;">
+      <span data-lang="ru" class="show">🇺🇸 Аляска: Производство & Цены</span>
+      <span data-lang="ja">🇺🇸 アラスカ: 生産・価格</span>
+    </h3>
+    <div id="alaska-data">—</div>
+  </div>
+  
+  <div class="card">
+    <h3 style="color: var(--ocean); margin-top: 0;">
+      <span data-lang="ru" class="show">🇯🇵 Япония: Импорт & Рынок</span>
+      <span data-lang="ja">🇯🇵 日本: 輸入・市場</span>
+    </h3>
+    <div id="japan-data">—</div>
+  </div>
 </div>
 
 <!-- НОВОСТИ по категориям -->
@@ -502,129 +534,75 @@ function renderAll(data) {
     const f = data.forecast_2026;
     document.getElementById('forecast-stat').textContent = f.total_run_million_fish + 'M';
     document.getElementById('forecast-range').textContent =
-      `${f.range_million_fish[0]}M – ${f.range_million_fish[1]}M (80% PI)`;
+      `${f.range_million_fish[0]}M – ${f.range_million_fish[1]}M`;
   }
 
-  // Накопленный вылов
-  const cumulative = data.harvest_by_district && 
-    Object.values(data.harvest_by_district).reduce((a, b) => (a || 0) + (b || 0), 0);
-  if (cumulative) {
-    document.getElementById('cumulative-stat').textContent = formatNumber(cumulative);
-  }
-
-  // Blue Sheet
-  renderBlueSheet(data.bluesheet);
-
-  // Районы (таблица вылова)
-  renderDistricts(data.harvest_by_district || {});
-
-  // Новости по категориям
-  renderNews(data.news || {});
-
-  // Пресс-релизы
-  renderPressReleases(data.press_releases || []);
+  // Отображаем структурированный мониторинг Notion-стиля
+  renderBluesheetStep(data.monitoring?.step_1_bluesheet);
+  renderMarketDataStep(data.monitoring?.step_2_market_data);
 }
 
-function renderBlueSheet(bs) {
-  const info = document.getElementById('blue-sheet-info');
-  const btn = document.getElementById('blue-sheet-btn');
-
-  if (bs?.available) {
-    info.innerHTML = `
-      <div style="opacity: 0.9; font-size: 0.9rem;">
-        ${bs.note}
-      </div>
-    `;
-    btn.href = 'data/blue-sheet.pdf';
-    btn.classList.remove('btn-disabled');
-  } else {
-    info.innerHTML = `<div style="opacity: 0.9; font-size: 0.9rem;">${bs?.note || t('seasonInactive')}</div>`;
-    btn.classList.add('btn-disabled');
-  }
-}
-
-function renderDistricts(districts) {
-  const container = document.getElementById('districts-container');
-  const entries = Object.entries(districts);
-  if (entries.length === 0) return;
-
-  container.innerHTML = `
-    <table class="districts-table">
-      <thead>
-        <tr><th>${t('district')}</th><th>${t('catch')}</th></tr>
-      </thead>
-      <tbody>
-        ${entries.map(([name, value]) => `
-          <tr><td>${name}</td><td>${value.toLocaleString()}</td></tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-function switchNewsTab(tab) {
-  // Скрываем все таблицы
-  document.querySelectorAll('.news-category').forEach(el => el.classList.remove('show'));
-  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+function renderBluesheetStep(bluesheet) {
+  if (!bluesheet) return;
   
-  // Показываем выбранную
-  document.getElementById(tab + '-news').classList.add('show');
-  document.getElementById('tab-' + tab).classList.add('active');
+  const lang = localStorage.getItem('preferred_lang') || 'ru';
+  const statusDiv = document.getElementById('bluesheet-status');
+  const tbody = document.getElementById('bluesheet-tbody');
+  
+  // Статус
+  if (bluesheet.available) {
+    const status_ru = `✅ <strong>Bluesheet опубликован</strong> (${bluesheet.date || 'дата не указана'})<br>Cumulative: <strong>${(bluesheet.cumulative_catch || 0).toLocaleString()}</strong> рыб`;
+    const status_ja = `✅ <strong>ブルーシート公開</strong> (${bluesheet.date || '日付未指定'})<br>累計: <strong>${(bluesheet.cumulative_catch || 0).toLocaleString()}</strong> 尾`;
+    statusDiv.innerHTML = lang === 'ja' ? status_ja : status_ru;
+  } else {
+    const note = bluesheet.note || 'Bluesheet ещё не опубликован';
+    statusDiv.innerHTML = `⚠️ ${note}`;
+  }
+  
+  // Таблица вылова по районам
+  tbody.innerHTML = '';
+  if (Object.keys(bluesheet.daily_catch_by_district).length > 0) {
+    Object.entries(bluesheet.daily_catch_by_district).forEach(([district, catch_val]) => {
+      const row = `<tr><td>${district}</td><td>${(catch_val || 0).toLocaleString()}</td></tr>`;
+      tbody.innerHTML += row;
+    });
+  } else {
+    tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #999;">—</td></tr>`;
+  }
 }
 
-function renderNews(data) {
+function renderMarketDataStep(market) {
+  if (!market) return;
+  
   const lang = localStorage.getItem('preferred_lang') || 'ru';
   
-  const categories = {
-    harvest: data.harvest || [],
-    price: data.price || [],
-    forecast: data.forecast || [],
-    season: data.season || [],
-  };
-  
-  const categoryIds = ['harvest', 'price', 'forecast', 'season'];
-  
-  categoryIds.forEach(categoryId => {
-    const newsArray = categories[categoryId] || [];
-    const container = document.getElementById(categoryId + '-news');
+  // Аляска
+  const alaskaDiv = document.getElementById('alaska-data');
+  if (market.alaska) {
+    const exVessel = market.alaska.prices?.ex_vessel || '—';
+    const newsCount = market.alaska.production?.items?.length || 0;
     
-    if (newsArray.length === 0) {
-      container.innerHTML = `<div class="empty">—</div>`;
-      return;
-    }
+    const alaska_ru = `
+      <p><strong>Ex-vessel цена:</strong> ${exVessel}</p>
+      <p><strong>Новостей:</strong> ${newsCount}</p>
+      <p style="font-size: 0.85rem; color: #999;">Производство: H&G, филе, икра</p>
+    `;
+    const alaska_ja = `
+      <p><strong>Ex-vessel価格:</strong> ${exVessel}</p>
+      <p><strong>ニュース:</strong> ${newsCount}件</p>
+      <p style="font-size: 0.85rem; color: #999;">生産: H&G、フィレ、イクラ</p>
+    `;
     
-    container.innerHTML = newsArray.map(item => {
-      const title = lang === 'ja' ? (item.title_ja || item.title_en) : (item.title_ru || item.title_en);
-      const summary = lang === 'ja' ? (item.summary_ja || item.summary_en) : (item.summary_ru || item.summary_en);
-      
-      return `
-        <div class="news-item">
-          <span class="source-badge">${item.source}</span>
-          <a href="${item.link}" target="_blank" rel="noopener">${title}</a>
-          <div class="news-meta">${formatDate(item.published)}</div>
-          ${summary ? `<div class="news-summary">${summary}</div>` : ''}
-        </div>
-      `;
-    }).join('');
-  });
-}
-
-function renderPressReleases(releases) {
-  const container = document.getElementById('press-container');
-  if (releases.length === 0) {
-    container.innerHTML = `<div class="empty">—</div>`;
-    return;
+    alaskaDiv.innerHTML = lang === 'ja' ? alaska_ja : alaska_ru;
   }
-  container.innerHTML = releases.map(item => `
-    <div class="news-item">
-      <span class="source-badge">ADF&G</span>
-      <a href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
-    </div>
-  `).join('');
-}
-
-loadData();
-</script>
-
-</body>
-</html>
+  
+  // Япония
+  const japanDiv = document.getElementById('japan-data');
+  if (market.japan) {
+    const toyosu = market.japan.wholesale_market?.toyosu_yen_per_kg || '—';
+    const import_vol = market.japan.import?.volume_tons ? `${market.japan.import.volume_tons} тонн` : '—';
+    
+    const japan_ru = `
+      <p><strong>Импорт:</strong> ${import_vol}</p>
+      <p><strong>Toyosu (оптовая):</strong> ${toyosu}</p>
+      <p
