@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🐟 Нерка Аляски 2026 / アラスカ ベニサケ 2026</title>
+  <meta name="description" content="Ежедневная сводка по вылову нерки Bristol Bay, Alaska. Blue Sheet ADF&G + новости рынка." />
+  <style>
+    :root {
+      --bg: #f7f5f0;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6b6b6b;
+      --accent: #c83737;       /* цвет нерки */
+      --accent-dark: #8e1f1f;
+      --ocean: #1a5490;
+      --border: #e5e0d6;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                   "Hiragino Sans", "Yu Gothic", "Meiryo",
+                   "Noto Sans JP", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 4rem;
+      line-height: 1.55;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--accent);
+    }
+    h1 {
+      font-size: 1.7rem;
+      margin: 0 0 0.3rem;
+      color: var(--accent-dark);
+    }
+    .subtitle { color: var(--muted); font-size: 0.95rem; }
+    .lang-switch {
+      display: flex;
+      gap: 0.3rem;
+      background: var(--card);
+      padding: 0.3rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    .lang-switch button {
+      border: none;
+      background: transparent;
+      padding: 0.4rem 0.9rem;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .lang-switch button.active {
+      background: var(--accent);
+      color: white;
+    }
+    .updated-bar {
+      background: var(--card);
+      padding: 0.7rem 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+      box-shadow: var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .live-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #2ecc71;
+      border-radius: 50%;
+      margin-right: 0.4rem;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    @media (max-width: 700px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      padding: 1.2rem;
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      margin: 0 0 0.7rem;
+      color: var(--ocean);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .stat {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      line-height: 1.1;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.3rem;
+    }
+    .stat-range {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+    }
+    .blue-sheet-card {
+      background: linear-gradient(135deg, #1a5490 0%, #2a6ea8 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+    .blue-sheet-card h2 { color: white; }
+    .btn {
+      display: inline-block;
+      background: white;
+      color: var(--ocean);
+      padding: 0.7rem 1.3rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+      margin-top: 0.7rem;
+      transition: transform 0.1s;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-disabled { opacity: 0.5; cursor: not-allowed; }
+    .section-title {
+      font-size: 1.3rem;
+      margin: 2rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .news-item {
+      background: var(--card);
+      padding: 1rem 1.2rem;
+      border-radius: 8px;
+      margin-bottom: 0.7rem;
+      border-left: 3px solid var(--accent);
+      box-shadow: var(--shadow);
+    }
+    .news-item a {
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .news-item a:hover { color: var(--accent); }
+    .news-meta {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+    .news-summary {
+      font-size: 0.9rem;
+      color: #444;
+      margin-top: 0.5rem;
+    }
+    .numbers-badge {
+      display: inline-block;
+      background: #fff4e5;
+      color: #b35900;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.4rem;
+      margin-right: 0.3rem;
+    }
+    .source-badge {
+      display: inline-block;
+      background: #eef2f7;
+      color: var(--ocean);
+      padding: 0.1rem 0.45rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-right: 0.4rem;
+    }
+    .districts-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    .districts-table th, .districts-table td {
+      text-align: left;
+      padding: 0.5rem 0.7rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .districts-table th {
+      background: #f0ebe0;
+      font-weight: 600;
+      color: var(--accent-dark);
+    }
+    .districts-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      font-family: 'SF Mono', Menlo, Consolas, monospace;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 2rem;
+      font-style: italic;
+    }
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+    footer a { color: var(--ocean); }
+    /* Скрытие элементов по языку */
+    [data-lang]:not(.show) { display: none; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>
+      <span data-lang="ru" class="show">🐟 Нерка Аляски — сезон 2026</span>
+      <span data-lang="ja">🐟 アラスカ ベニサケ — 2026年漁期</span>
+    </h1>
+    <div class="subtitle">
+      <span data-lang="ru" class="show">Ежедневная сводка вылова Bristol Bay + Blue Sheet ADF&G</span>
+      <span data-lang="ja">ブリストル湾 日次漁獲データ + ADF&G ブルーシート</span>
+    </div>
+  </div>
+  <div class="lang-switch">
+    <button onclick="switchLang('ru')" id="btn-ru" class="active">🇷🇺 RU</button>
+    <button onclick="switchLang('ja')" id="btn-ja">🇯🇵 日本語</button>
+  </div>
+</header>
+
+<div class="updated-bar">
+  <div>
+    <span class="live-dot"></span>
+    <span data-lang="ru" class="show">Обновлено:</span>
+    <span data-lang="ja">更新日時:</span>
+    <strong id="updated-time">—</strong>
+  </div>
+  <div>
+    <span data-lang="ru" class="show">Автообновление ежедневно в 09:00 МСК</span>
+    <span data-lang="ja">毎日モスクワ時間 9:00 自動更新</span>
+  </div>
+</div>
+
+<!-- ПРОГНОЗ И ТЕКУЩИЕ ЦИФРЫ -->
+<div class="grid">
+  <div class="card">
+    <div class="stat-label">
+      <span data-lang="ru" class="show">Прогноз ADF&G на 2026</span>
+      <span data-lang="ja">ADF&G 2026年予測</span>
+    </div>
+    <div class="stat" id="forecast-stat">45.32M</div>
+    <div class="stat-range" id="forecast-range">—</div>
+  </div>
+
+  <div class="card">
+    <div class="stat-label">
+      <span data-lang="ru" class="show">Накопленный вылов Bristol Bay</span>
+      <span data-lang="ja">ブリストル湾 累積漁獲量</span>
+    </div>
+    <div class="stat" id="cumulative-stat">—</div>
+    <div class="stat-range">
+      <span data-lang="ru" class="show">из Blue Sheet (обновляется в сезон июнь–август)</span>
+      <span data-lang="ja">ブルーシートより(6月〜8月の漁期中更新)</span>
+    </div>
+  </div>
+</div>
+
+<!-- BLUE SHEET -->
+<div class="blue-sheet-card">
+  <h2>📋
+    <span data-lang="ru" class="show">Официальный Blue Sheet (ADF&G)</span>
+    <span data-lang="ja">公式ブルーシート (ADF&G)</span>
+  </h2>
+  <div id="blue-sheet-info">—</div>
+  <a id="blue-sheet-btn" class="btn btn-disabled" href="#" target="_blank">
+    <span data-lang="ru" class="show">📥 Открыть PDF</span>
+    <span data-lang="ja">📥 PDFを開く</span>
+  </a>
+</div>
+
+<!-- ВЫЛОВ ПО РАЙОНАМ -->
+<h2 class="section-title">
+  <span data-lang="ru" class="show">📊 Вылов по районам Bristol Bay</span>
+  <span data-lang="ja">📊 ブリストル湾 地区別漁獲量</span>
+</h2>
+<div class="card" id="districts-container">
+  <div class="empty" data-lang="ru">Данные появятся после публикации Blue Sheet (сезон стартует ~22 июня)</div>
+  <div class="empty" data-lang="ja">ブルーシート公開後にデータが表示されます (漁期開始 〜6月22日)</div>
+</div>
+
+<!-- НОВОСТИ по категориям -->
+<h2 class="section-title">
+  <span data-lang="ru" class="show">📊 Мониторинг по категориям</span>
+  <span data-lang="ja">📊 カテゴリ別モニタリング</span>
+</h2>
+
+<!-- Табы категорий -->
+<div id="news-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+  <button onclick="switchNewsTab('harvest')" class="tab-btn active" id="tab-harvest">
+    <span data-lang="ru" class="show">🎣 Вылов</span>
+    <span data-lang="ja">🎣 漁獲</span>
+  </button>
+  <button onclick="switchNewsTab('price')" class="tab-btn" id="tab-price">
+    <span data-lang="ru" class="show">💰 Цены</span>
+    <span data-lang="ja">💰 価格</span>
+  </button>
+  <button onclick="switchNewsTab('forecast')" class="tab-btn" id="tab-forecast">
+    <span data-lang="ru" class="show">📈 Прогнозы</span>
+    <span data-lang="ja">📈 予測</span>
+  </button>
+  <button onclick="switchNewsTab('season')" class="tab-btn" id="tab-season">
+    <span data-lang="ru" class="show">🌊 Сезон</span>
+    <span data-lang="ja">🌊 漁期</span>
+  </button>
+</div>
+
+<style>
+  .tab-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: #f5f0e8; }
+  .tab-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .news-category { display: none; }
+  .news-category.show { display: block; }
+</style>
+
+<div id="news-container">
+  <div id="harvest-news" class="news-category show"></div>
+  <div id="price-news" class="news-category"></div>
+  <div id="forecast-news" class="news-category"></div>
+  <div id="season-news" class="news-category"></div>
+</div>
+
+<!-- ПРЕСС-РЕЛИЗЫ ADF&G -->
+<h2 class="section-title">
+  <span data-lang="ru" class="show">🏛 Пресс-релизы ADF&G</span>
+  <span data-lang="ja">🏛 ADF&G プレスリリース</span>
+</h2>
+<div id="press-container">
+  <div class="empty">—</div>
+</div>
+
+<footer>
+  <p>
+    <span data-lang="ru" class="show">
+      Источники: <a href="https://www.adfg.alaska.gov" target="_blank">ADF&G</a> ·
+      <a href="https://www.bbrsda.com" target="_blank">BBRSDA</a> ·
+      <a href="https://www.seafoodsource.com" target="_blank">SeafoodSource</a> ·
+      <a href="https://www.kdlg.org" target="_blank">KDLG</a>
+    </span>
+    <span data-lang="ja">
+      情報源: <a href="https://www.adfg.alaska.gov" target="_blank">ADF&G</a> ·
+      <a href="https://www.bbrsda.com" target="_blank">BBRSDA</a> ·
+      <a href="https://www.seafoodsource.com" target="_blank">SeafoodSource</a> ·
+      <a href="https://www.kdlg.org" target="_blank">KDLG</a>
+    </span>
+  </p>
+  <p style="margin-top: 0.5rem;">
+    <span data-lang="ru" class="show">Данные обновляются автоматически через GitHub Actions. Не является официальным источником.</span>
+    <span data-lang="ja">データは GitHub Actions により自動更新されます。公式情報源ではありません。</span>
+  </p>
+</footer>
+
+<script>
+// ============================================================
+// Переключение языков
+// ============================================================
+function switchLang(lang) {
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    el.classList.toggle('show', el.dataset.lang === lang);
+  });
+  document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+  document.getElementById('btn-ja').classList.toggle('active', lang === 'ja');
+  document.documentElement.lang = lang;
+  localStorage.setItem('preferred_lang', lang);
+}
+
+// Восстановить язык из localStorage
+const savedLang = localStorage.getItem('preferred_lang');
+if (savedLang === 'ja') switchLang('ja');
+
+// ============================================================
+// Загрузка данных
+// ============================================================
+const I18N = {
+  ru: {
+    seasonInactive: 'Сезон ещё не начат. Blue Sheet появится после ~22 июня 2026.',
+    seasonActive: 'Blue Sheet актуален',
+    fileSize: 'Размер файла',
+    downloadedAt: 'Скачан',
+    noNews: 'Свежих новостей пока нет',
+    district: 'Район',
+    catch: 'Вылов (рыб)',
+    found: 'найдено',
+  },
+  ja: {
+    seasonInactive: '漁期はまだ始まっていません。ブルーシートは2026年6月22日頃から公開されます。',
+    seasonActive: 'ブルーシート公開中',
+    fileSize: 'ファイルサイズ',
+    downloadedAt: '取得日時',
+    noNews: '最新ニュースはありません',
+    district: '地区',
+    catch: '漁獲量 (尾)',
+    found: '件',
+  }
+};
+
+function t(key) {
+  const lang = localStorage.getItem('preferred_lang') || 'ru';
+  return I18N[lang][key] || key;
+}
+
+function formatNumber(n) {
+  if (n == null) return '—';
+  if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + 'M';
+  if (n >= 1_000) return (n / 1_000).toFixed(0) + 'K';
+  return n.toLocaleString();
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const lang = localStorage.getItem('preferred_lang') || 'ru';
+    return d.toLocaleString(lang === 'ja' ? 'ja-JP' : 'ru-RU', {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit',
+      timeZone: lang === 'ja' ? 'Asia/Tokyo' : 'Europe/Moscow'
+    });
+  } catch { return iso; }
+}
+
+async function loadData() {
+  try {
+    const response = await fetch('data/latest.json?t=' + Date.now());
+    if (!response.ok) throw new Error('Не удалось загрузить latest.json');
+    const data = await response.json();
+    renderAll(data);
+  } catch (err) {
+    console.error('Ошибка загрузки:', err);
+    document.getElementById('news-container').innerHTML =
+      `<div class="empty">⚠️ ${err.message}<br><small>Файл data/latest.json появится после первого запуска GitHub Actions</small></div>`;
+  }
+}
+
+function renderAll(data) {
+  // Время обновления
+  document.getElementById('updated-time').textContent = formatDate(data.generated_at);
+
+  // Прогноз
+  if (data.forecast_2026) {
+    const f = data.forecast_2026;
+    document.getElementById('forecast-stat').textContent = f.total_run_million_fish + 'M';
+    document.getElementById('forecast-range').textContent =
+      `${f.range_million_fish[0]}M – ${f.range_million_fish[1]}M (80% PI)`;
+  }
+
+  // Накопленный вылов
+  const cumulative = data.harvest_by_district && 
+    Object.values(data.harvest_by_district).reduce((a, b) => (a || 0) + (b || 0), 0);
+  if (cumulative) {
+    document.getElementById('cumulative-stat').textContent = formatNumber(cumulative);
+  }
+
+  // Blue Sheet
+  renderBlueSheet(data.bluesheet);
+
+  // Районы (таблица вылова)
+  renderDistricts(data.harvest_by_district || {});
+
+  // Новости по категориям
+  renderNews(data.news || {});
+
+  // Пресс-релизы
+  renderPressReleases(data.press_releases || []);
+}
+
+function renderBlueSheet(bs) {
+  const info = document.getElementById('blue-sheet-info');
+  const btn = document.getElementById('blue-sheet-btn');
+
+  if (bs?.available) {
+    info.innerHTML = `
+      <div style="opacity: 0.9; font-size: 0.9rem;">
+        ${bs.note}
+      </div>
+    `;
+    btn.href = 'data/blue-sheet.pdf';
+    btn.classList.remove('btn-disabled');
+  } else {
+    info.innerHTML = `<div style="opacity: 0.9; font-size: 0.9rem;">${bs?.note || t('seasonInactive')}</div>`;
+    btn.classList.add('btn-disabled');
+  }
+}
+
+function renderDistricts(districts) {
+  const container = document.getElementById('districts-container');
+  const entries = Object.entries(districts);
+  if (entries.length === 0) return;
+
+  container.innerHTML = `
+    <table class="districts-table">
+      <thead>
+        <tr><th>${t('district')}</th><th>${t('catch')}</th></tr>
+      </thead>
+      <tbody>
+        ${entries.map(([name, value]) => `
+          <tr><td>${name}</td><td>${value.toLocaleString()}</td></tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function switchNewsTab(tab) {
+  // Скрываем все таблицы
+  document.querySelectorAll('.news-category').forEach(el => el.classList.remove('show'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  
+  // Показываем выбранную
+  document.getElementById(tab + '-news').classList.add('show');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+function renderNews(data) {
+  const lang = localStorage.getItem('preferred_lang') || 'ru';
+  
+  const categories = {
+    harvest: data.harvest || [],
+    price: data.price || [],
+    forecast: data.forecast || [],
+    season: data.season || [],
+  };
+  
+  const categoryIds = ['harvest', 'price', 'forecast', 'season'];
+  
+  categoryIds.forEach(categoryId => {
+    const newsArray = categories[categoryId] || [];
+    const container = document.getElementById(categoryId + '-news');
+    
+    if (newsArray.length === 0) {
+      container.innerHTML = `<div class="empty">—</div>`;
+      return;
+    }
+    
+    container.innerHTML = newsArray.map(item => {
+      const title = lang === 'ja' ? (item.title_ja || item.title_en) : (item.title_ru || item.title_en);
+      const summary = lang === 'ja' ? (item.summary_ja || item.summary_en) : (item.summary_ru || item.summary_en);
+      
+      return `
+        <div class="news-item">
+          <span class="source-badge">${item.source}</span>
+          <a href="${item.link}" target="_blank" rel="noopener">${title}</a>
+          <div class="news-meta">${formatDate(item.published)}</div>
+          ${summary ? `<div class="news-summary">${summary}</div>` : ''}
+        </div>
+      `;
+    }).join('');
+  });
+}
+
+function renderPressReleases(releases) {
+  const container = document.getElementById('press-container');
+  if (releases.length === 0) {
+    container.innerHTML = `<div class="empty">—</div>`;
+    return;
+  }
+  container.innerHTML = releases.map(item => `
+    <div class="news-item">
+      <span class="source-badge">ADF&G</span>
+      <a href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
+    </div>
+  `).join('');
+}
+
+loadData();
+</script>
+
+</body>
+</html>
