@@ -317,26 +317,100 @@
   </a>
 </div>
 
-<!-- ВЫЛОВ ПО РАЙОНАМ -->
+<!-- СТРУКТУРИРОВАННЫЙ МОНИТОРИНГ (как в Notion) -->
 <h2 class="section-title">
-  <span data-lang="ru" class="show">📊 Вылов по районам Bristol Bay</span>
-  <span data-lang="ja">📊 ブリストル湾 地区別漁獲量</span>
+  <span data-lang="ru" class="show">🔴 ШАГ 1: BLUESHEET ADF&G (ПРИОРИТЕТ)</span>
+  <span data-lang="ja">🔴 ステップ1: BLUESHEET ADF&G (優先)</span>
 </h2>
-<div class="card" id="districts-container">
-  <div class="empty" data-lang="ru">Данные появятся после публикации Blue Sheet (сезон стартует ~22 июня)</div>
-  <div class="empty" data-lang="ja">ブルーシート公開後にデータが表示されます (漁期開始 〜6月22日)</div>
+
+<div class="card">
+  <div id="bluesheet-status">—</div>
+  <table class="districts-table" id="bluesheet-table" style="margin-top: 1rem;">
+    <thead>
+      <tr>
+        <th><span data-lang="ru" class="show">Район</span><span data-lang="ja">地区</span></th>
+        <th><span data-lang="ru" class="show">Вылов (рыб)</span><span data-lang="ja">漁獲量 (尾)</span></th>
+      </tr>
+    </thead>
+    <tbody id="bluesheet-tbody"></tbody>
+  </table>
 </div>
 
-<!-- НОВОСТИ -->
 <h2 class="section-title">
-  <span data-lang="ru" class="show">📰 Свежие новости рынка</span>
-  <span data-lang="ja">📰 市場ニュース</span>
+  <span data-lang="ru" class="show">🟠 ШАГ 2: ОСТАЛЬНЫЕ ДАННЫЕ</span>
+  <span data-lang="ja">🟠 ステップ2: その他データ</span>
 </h2>
-<div id="news-container">
-  <div class="empty">
-    <span data-lang="ru" class="show">Загрузка...</span>
-    <span data-lang="ja">読み込み中...</span>
+
+<div class="grid">
+  <div class="card">
+    <h3 style="color: var(--ocean); margin-top: 0;">
+      <span data-lang="ru" class="show">🇺🇸 Аляска: Производство & Цены</span>
+      <span data-lang="ja">🇺🇸 アラスカ: 生産・価格</span>
+    </h3>
+    <div id="alaska-data">—</div>
   </div>
+  
+  <div class="card">
+    <h3 style="color: var(--ocean); margin-top: 0;">
+      <span data-lang="ru" class="show">🇯🇵 Япония: Импорт & Рынок</span>
+      <span data-lang="ja">🇯🇵 日本: 輸入・市場</span>
+    </h3>
+    <div id="japan-data">—</div>
+  </div>
+</div>
+
+<!-- НОВОСТИ по категориям -->
+<h2 class="section-title">
+  <span data-lang="ru" class="show">📊 Мониторинг по категориям</span>
+  <span data-lang="ja">📊 カテゴリ別モニタリング</span>
+</h2>
+
+<!-- Табы категорий -->
+<div id="news-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
+  <button onclick="switchNewsTab('harvest')" class="tab-btn active" id="tab-harvest">
+    <span data-lang="ru" class="show">🎣 Вылов</span>
+    <span data-lang="ja">🎣 漁獲</span>
+  </button>
+  <button onclick="switchNewsTab('price')" class="tab-btn" id="tab-price">
+    <span data-lang="ru" class="show">💰 Цены</span>
+    <span data-lang="ja">💰 価格</span>
+  </button>
+  <button onclick="switchNewsTab('forecast')" class="tab-btn" id="tab-forecast">
+    <span data-lang="ru" class="show">📈 Прогнозы</span>
+    <span data-lang="ja">📈 予測</span>
+  </button>
+  <button onclick="switchNewsTab('season')" class="tab-btn" id="tab-season">
+    <span data-lang="ru" class="show">🌊 Сезон</span>
+    <span data-lang="ja">🌊 漁期</span>
+  </button>
+</div>
+
+<style>
+  .tab-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .tab-btn:hover { background: #f5f0e8; }
+  .tab-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  .news-category { display: none; }
+  .news-category.show { display: block; }
+</style>
+
+<div id="news-container">
+  <div id="harvest-news" class="news-category show"></div>
+  <div id="price-news" class="news-category"></div>
+  <div id="forecast-news" class="news-category"></div>
+  <div id="season-news" class="news-category"></div>
 </div>
 
 <!-- ПРЕСС-РЕЛИЗЫ ADF&G -->
@@ -460,106 +534,75 @@ function renderAll(data) {
     const f = data.forecast_2026;
     document.getElementById('forecast-stat').textContent = f.total_run_million_fish + 'M';
     document.getElementById('forecast-range').textContent =
-      `${f.range_million_fish[0]}M – ${f.range_million_fish[1]}M (80% PI)`;
+      `${f.range_million_fish[0]}M – ${f.range_million_fish[1]}M`;
   }
 
-  // Накопленный вылов
-  const cumulative = data.bluesheet_data?.totals?.bristol_bay_cumulative;
-  if (cumulative) {
-    document.getElementById('cumulative-stat').textContent = formatNumber(cumulative);
-  }
-
-  // Blue Sheet
-  renderBlueSheet(data.bluesheet);
-
-  // Районы
-  renderDistricts(data.bluesheet_data?.districts || {});
-
-  // Новости
-  renderNews(data.news || []);
-
-  // Пресс-релизы
-  renderPressReleases(data.press_releases || []);
+  // Отображаем структурированный мониторинг Notion-стиля
+  renderBluesheetStep(data.monitoring?.step_1_bluesheet);
+  renderMarketDataStep(data.monitoring?.step_2_market_data);
 }
 
-function renderBlueSheet(bs) {
-  const info = document.getElementById('blue-sheet-info');
-  const btn = document.getElementById('blue-sheet-btn');
-
-  if (bs?.available) {
-    info.innerHTML = `
-      <div style="opacity: 0.9; font-size: 0.9rem;">
-        ${bs.note}
-      </div>
-    `;
-    btn.href = 'data/blue-sheet.pdf';
-    btn.classList.remove('btn-disabled');
-  } else {
-    info.innerHTML = `<div style="opacity: 0.9; font-size: 0.9rem;">${bs?.note || t('seasonInactive')}</div>`;
-    btn.classList.add('btn-disabled');
-  }
-}
-
-function renderDistricts(districts) {
-  const container = document.getElementById('districts-container');
-  const entries = Object.entries(districts);
-  if (entries.length === 0) return;
-
-  container.innerHTML = `
-    <table class="districts-table">
-      <thead>
-        <tr><th>${t('district')}</th><th>${t('catch')}</th></tr>
-      </thead>
-      <tbody>
-        ${entries.map(([name, value]) => `
-          <tr><td>${name}</td><td>${value.toLocaleString()}</td></tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderNews(news) {
-  const container = document.getElementById('news-container');
-  if (news.length === 0) {
-    container.innerHTML = `<div class="empty">${t('noNews')}</div>`;
-    return;
-  }
-
+function renderBluesheetStep(bluesheet) {
+  if (!bluesheet) return;
+  
   const lang = localStorage.getItem('preferred_lang') || 'ru';
-
-  container.innerHTML = news.map(item => {
-    // Выбираем заголовок и описание по языку
-    const title = lang === 'ja' ? (item.title_ja || item.title_en) : (item.title_ru || item.title_en);
-    const summary = lang === 'ja' ? (item.summary_ja || item.summary_en) : (item.summary_ru || item.summary_en);
-
-    return `
-      <div class="news-item">
-        <span class="source-badge">${item.source}</span>
-        <a href="${item.link}" target="_blank" rel="noopener">${title}</a>
-        <div class="news-meta">${formatDate(item.published)}</div>
-        ${summary ? `<div class="news-summary">${summary}</div>` : ''}
-      </div>
-    `;
-  }).join('');
-}
-
-function renderPressReleases(releases) {
-  const container = document.getElementById('press-container');
-  if (releases.length === 0) {
-    container.innerHTML = `<div class="empty">—</div>`;
-    return;
+  const statusDiv = document.getElementById('bluesheet-status');
+  const tbody = document.getElementById('bluesheet-tbody');
+  
+  // Статус
+  if (bluesheet.available) {
+    const status_ru = `✅ <strong>Bluesheet опубликован</strong> (${bluesheet.date || 'дата не указана'})<br>Cumulative: <strong>${(bluesheet.cumulative_catch || 0).toLocaleString()}</strong> рыб`;
+    const status_ja = `✅ <strong>ブルーシート公開</strong> (${bluesheet.date || '日付未指定'})<br>累計: <strong>${(bluesheet.cumulative_catch || 0).toLocaleString()}</strong> 尾`;
+    statusDiv.innerHTML = lang === 'ja' ? status_ja : status_ru;
+  } else {
+    const note = bluesheet.note || 'Bluesheet ещё не опубликован';
+    statusDiv.innerHTML = `⚠️ ${note}`;
   }
-  container.innerHTML = releases.map(item => `
-    <div class="news-item">
-      <span class="source-badge">ADF&G</span>
-      <a href="${item.link}" target="_blank" rel="noopener">${item.title}</a>
-    </div>
-  `).join('');
+  
+  // Таблица вылова по районам
+  tbody.innerHTML = '';
+  if (Object.keys(bluesheet.daily_catch_by_district).length > 0) {
+    Object.entries(bluesheet.daily_catch_by_district).forEach(([district, catch_val]) => {
+      const row = `<tr><td>${district}</td><td>${(catch_val || 0).toLocaleString()}</td></tr>`;
+      tbody.innerHTML += row;
+    });
+  } else {
+    tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: #999;">—</td></tr>`;
+  }
 }
 
-loadData();
-</script>
-
-</body>
-</html>
+function renderMarketDataStep(market) {
+  if (!market) return;
+  
+  const lang = localStorage.getItem('preferred_lang') || 'ru';
+  
+  // Аляска
+  const alaskaDiv = document.getElementById('alaska-data');
+  if (market.alaska) {
+    const exVessel = market.alaska.prices?.ex_vessel || '—';
+    const newsCount = market.alaska.production?.items?.length || 0;
+    
+    const alaska_ru = `
+      <p><strong>Ex-vessel цена:</strong> ${exVessel}</p>
+      <p><strong>Новостей:</strong> ${newsCount}</p>
+      <p style="font-size: 0.85rem; color: #999;">Производство: H&G, филе, икра</p>
+    `;
+    const alaska_ja = `
+      <p><strong>Ex-vessel価格:</strong> ${exVessel}</p>
+      <p><strong>ニュース:</strong> ${newsCount}件</p>
+      <p style="font-size: 0.85rem; color: #999;">生産: H&G、フィレ、イクラ</p>
+    `;
+    
+    alaskaDiv.innerHTML = lang === 'ja' ? alaska_ja : alaska_ru;
+  }
+  
+  // Япония
+  const japanDiv = document.getElementById('japan-data');
+  if (market.japan) {
+    const toyosu = market.japan.wholesale_market?.toyosu_yen_per_kg || '—';
+    const import_vol = market.japan.import?.volume_tons ? `${market.japan.import.volume_tons} тонн` : '—';
+    
+    const japan_ru = `
+      <p><strong>Импорт:</strong> ${import_vol}</p>
+      <p><strong>Toyosu (оптовая):</strong> ${toyosu}</p>
+      <p
