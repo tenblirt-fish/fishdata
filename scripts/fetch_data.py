@@ -1,8 +1,6 @@
 """
-Сбор данных по нерке Аляски — версия v6.0
-Структурированный мониторинг как в Notion:
-1. ПРИОРИТЕТ: Bluesheet ADF&G (ежедневный отчёт о вылове)
-2. Остальные данные: цены, переработка, рынок Японии
+Сбор данных по нерке Аляски — версия v8.0
+Прямой парсинг сайтов без RSS (обходим пейволл)
 """
 
 import json
@@ -13,274 +11,386 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 try:
-    import feedparser
     import requests
     from bs4 import BeautifulSoup
     from deep_translator import GoogleTranslator
-    print("✅ Все библиотеки импортированы")
+    print("✅ Библиотеки импортированы")
 except ImportError as e:
-    print(f"❌ Ошибка импорта: {e}")
+    print(f"❌ {e}")
     sys.exit(1)
-
-# ============================================================
-# Константы
-# ============================================================
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 HISTORY_DIR = DATA_DIR / "history"
 
-# ШАГ 1: ПРИОРИТЕТ — Bluesheet ADF&G
-BLUESHEET_URLS = [
-    "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon",
-    "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.bbnews",
-    "https://www.adfg.alaska.gov/index.cfm?adfg=newsroom.pressreleases",
+HARVEST_URL = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.harvestsummary"
+ADFG_BB_URL = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.salmon"
+ADFG_NEWS_URL = "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.bbnews"
+
+# Источники для прямого парсинга (без RSS, бесплатные)
+NEWS_SOURCES = [
+    {
+        "name": "KDLG Bristol Bay",
+        "url": "https://www.kdlg.org/search?query=sockeye+salmon&t=article",
+        "article_selector": "article, .node--type-article, .views-row",
+        "title_selector": "h2, h3, .node__title",
+        "link_selector": "a",
+        "summary_selector": "p, .field--name-body",
+    },
+    {
+        "name": "Alaska Beacon",
+        "url": "https://alaskabeacon.com/?s=sockeye+salmon",
+        "article_selector": "article, .post",
+        "title_selector": "h2, h3, .entry-title",
+        "link_selector": "a",
+        "summary_selector": ".entry-summary, p",
+    },
+    {
+        "name": "National Fisherman",
+        "url": "https://www.nationalfisherman.com/?s=bristol+bay+sockeye",
+        "article_selector": "article, .article-item, .post",
+        "title_selector": "h2, h3, .article-title",
+        "link_selector": "a",
+        "summary_selector": "p, .excerpt",
+    },
+    {
+        "name": "BBRSDA",
+        "url": "https://www.bbrsda.com/updates/",
+        "article_selector": "article, .update-item, .entry, .post",
+        "title_selector": "h2, h3, h4",
+        "link_selector": "a",
+        "summary_selector": "p",
+    },
+    {
+        "name": "Anchorage Daily News",
+        "url": "https://www.adn.com/search/?q=bristol+bay+sockeye&sort=date",
+        "article_selector": "article, .ArticleCard",
+        "title_selector": "h2, h3, .ArticleCard-headline",
+        "link_selector": "a",
+        "summary_selector": "p, .ArticleCard-description",
+    },
+    {
+        "name": "SeafoodSource",
+        "url": "https://www.seafoodsource.com/news/supply-trade?q=bristol+bay+sockeye",
+        "article_selector": "article, .news-item, .article-card",
+        "title_selector": "h2, h3, .article-title",
+        "link_selector": "a",
+        "summary_selector": "p, .summary",
+    },
 ]
 
-# ШАГ 2: Остальные источники
-RSS_FEEDS = [
-    ("SeafoodSource", "https://www.seafoodsource.com/rss/news"),
-    ("BBRSDA", "https://www.bbrsda.com/rss"),
-    ("Undercurrent News", "https://www.undercurrentnews.com/feed/"),
-    ("KDLG Bristol Bay", "https://www.kdlg.org/feed"),
-    ("IntraFish", "https://www.intrafish.com/rss"),
+KEYWORDS = [
+    "sockeye", "bristol bay", "salmon harvest", "red salmon",
+    "ex-vessel", "salmon season", "salmon price", "adf&g",
+    "нерка", "лосось", "аляск",
 ]
 
-USER_AGENT = "Mozilla/5.0 (compatible; AlaskaSockeyeMonitor/6.0)"
-TIMEOUT = 25
-
-# Районы Bristol Bay
-DISTRICTS = ["Naknek-Kvichak", "Egegik", "Ugashik", "Nushagak", "Togiak"]
+USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+TIMEOUT = 20
 
 
-# ============================================================
-# ШАГ 1: BLUESHEET (ПРИОРИТЕТ)
-# ============================================================
-
-def fetch_bluesheet():
-    """
-    Шаг 1: Мониторинг Bluesheet ADF&G — ПРИОРИТЕТ.
-    Ищет свежий ежедневный отчёт о вылове в Bristol Bay.
-    """
-    print("\n" + "="*70)
-    print("🔴 ШАГ 1: BLUESHEET ADF&G (ПРИОРИТЕТ)")
-    print("="*70)
-    
-    bluesheet_data = {
-        "available": False,
-        "date": None,
-        "source_url": None,
-        "daily_catch_by_district": {},  # Nushagak: 12345, Egegik: 54321 и т.д.
-        "cumulative_catch": None,
-        "escapement": {},  # Wood: 123456, Nushagak: 234567 и т.д.
-        "effort": {
-            "permitted_deliveries": None,
-            "boats_active": None,
-        },
-        "comparison": {
-            "vs_forecast_2026": None,  # "78% от прогноза (45.32M)"
-            "vs_2025": None,           # "41.2M в 2025"
-        },
-        "management_actions": [],  # extensions, closures, restrictions
-        "last_updated": datetime.now(timezone.utc).isoformat(),
-        "note": "Bluesheet ещё не опубликован или вне сезона",
-    }
-    
-    print("Ищу свежий Bluesheet в приоритетных источниках...")
-    
-    for url in BLUESHEET_URLS:
-        print(f"\n📍 Проверяю: {url}")
-        
-        try:
-            headers = {"User-Agent": USER_AGENT}
-            response = requests.get(url, headers=headers, timeout=TIMEOUT)
-            soup = BeautifulSoup(response.text, "html.parser")
-            
-            # Ищем "Daily Catch", "Bluesheet", "Inseason" в заголовках
-            page_text = soup.get_text()
-            
-            if "daily" in page_text.lower() or "catch" in page_text.lower():
-                print(f"  ✅ Найден отчёт о вылове")
-                
-                # Пытаемся извлечь дату
-                date_match = re.search(r"(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})", page_text)
-                if date_match:
-                    bluesheet_data["date"] = date_match.group(0)
-                    print(f"     Дата: {bluesheet_data['date']}")
-                
-                # Ищем цифры вылова по районам
-                for district in DISTRICTS:
-                    pattern = rf"{district}[:\s]+([0-9,]+)"
-                    match = re.search(pattern, page_text, re.IGNORECASE)
-                    if match:
-                        value_str = match.group(1).replace(",", "")
-                        try:
-                            value = int(value_str)
-                            bluesheet_data["daily_catch_by_district"][district] = value
-                            print(f"     {district}: {value:,}")
-                        except:
-                            pass
-                
-                # Ищем cumulative catch (нарастающий итог)
-                cumulative_match = re.search(r"cumulative[:\s]+([0-9,]+)", page_text, re.IGNORECASE)
-                if cumulative_match:
-                    bluesheet_data["cumulative_catch"] = int(cumulative_match.group(1).replace(",", ""))
-                    print(f"     Cumulative: {bluesheet_data['cumulative_catch']:,}")
-                
-                bluesheet_data["available"] = True
-                bluesheet_data["source_url"] = url
-                bluesheet_data["note"] = "Bluesheet актуален"
-                break
-                
-        except Exception as e:
-            print(f"  ⚠️  Ошибка: {e}")
-    
-    if not bluesheet_data["available"]:
-        print("\n⚠️  Свежий Bluesheet не найден (вне сезона или ещё не опубликован)")
-    
-    return bluesheet_data
+def http_get(url):
+    try:
+        headers = {
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        r = requests.get(url, headers=headers, timeout=TIMEOUT)
+        r.raise_for_status()
+        return r
+    except Exception as e:
+        print(f"  ⚠️  {url[:60]}: {type(e).__name__}")
+        return None
 
 
-# ============================================================
-# ШАГ 2: ОСТАЛЬНЫЕ ДАННЫЕ
-# ============================================================
-
-def translate_text(text, target_lang):
-    """Перевод через Google Translate."""
-    if not text or len(text) < 5:
+def translate_text(text, lang):
+    if not text or len(text.strip()) < 5:
         return text
     try:
-        text_short = text[:800] if len(text) > 800 else text
-        translator = GoogleTranslator(source='auto', target=target_lang)
-        translated = translator.translate(text_short)
-        time.sleep(0.3)
-        return translated
-    except Exception as e:
+        t = GoogleTranslator(source='auto', target=lang)
+        result = t.translate(text[:600])
+        time.sleep(0.25)
+        return result or text
+    except:
         return text
 
 
-def fetch_market_data():
-    """
-    Шаг 2: Сбор остальных данных.
-    - Производство и цены (ex-vessel, оптовые)
-    - Японский рынок (импорт, цены)
-    - Аналитика
-    """
+def is_relevant(text):
+    return any(kw.lower() in text.lower() for kw in KEYWORDS)
+
+
+def parse_news_source(source):
+    """Парсит один источник напрямую без RSS."""
+    print(f"\n🔍 {source['name']}...")
+    print(f"   {source['url']}")
+
+    items = []
+    resp = http_get(source["url"])
+    if not resp:
+        return items
+
+    try:
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        # Пробуем найти статьи по селектору
+        articles = []
+        for sel in source["article_selector"].split(", "):
+            found = soup.select(sel)
+            if found:
+                articles = found
+                break
+
+        if not articles:
+            # Fallback — ищем все ссылки с текстом
+            articles = soup.find_all("a", href=True)
+
+        print(f"   Найдено блоков: {len(articles)}")
+
+        for art in articles[:20]:
+            # Заголовок
+            title = ""
+            for sel in source["title_selector"].split(", "):
+                el = art.select_one(sel) if hasattr(art, 'select_one') else None
+                if el:
+                    title = el.get_text(strip=True)
+                    break
+            if not title:
+                title = art.get_text(strip=True)[:120]
+
+            if len(title) < 15:
+                continue
+
+            # Ссылка
+            link = ""
+            a_tag = art.find("a") if hasattr(art, 'find') else art
+            if a_tag and a_tag.get("href"):
+                href = a_tag["href"]
+                if href.startswith("http"):
+                    link = href
+                elif href.startswith("/"):
+                    domain = "/".join(source["url"].split("/")[:3])
+                    link = domain + href
+
+            # Summary
+            summary = ""
+            for sel in source["summary_selector"].split(", "):
+                el = art.select_one(sel) if hasattr(art, 'select_one') else None
+                if el:
+                    summary = el.get_text(strip=True)[:400]
+                    break
+
+            # Проверяем релевантность
+            if not is_relevant(title + " " + summary):
+                continue
+
+            print(f"   ✅ {title[:70]}")
+            items.append({
+                "title": title,
+                "link": link,
+                "summary": summary,
+                "published": "",
+            })
+
+            if len(items) >= 5:
+                break
+
+    except Exception as e:
+        print(f"   ❌ Ошибка: {e}")
+
+    return items
+
+
+def fetch_adfg_news_direct():
+    """Прямой парсинг пресс-релизов ADF&G Bristol Bay."""
+    print(f"\n🏛  ADF&G Bristol Bay News...")
+    items = []
+
+    resp = http_get(ADFG_NEWS_URL)
+    if not resp:
+        return items
+
+    try:
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+        for link in soup.find_all("a", href=True):
+            text = link.get_text(strip=True)
+            href = link["href"]
+
+            if len(text) < 15:
+                continue
+            if not any(kw in text.lower() for kw in ["salmon", "sockeye", "2026", "harvest", "season"]):
+                continue
+
+            full_url = href if href.startswith("http") else f"https://www.adfg.alaska.gov{href}"
+            items.append({
+                "title": text,
+                "link": full_url,
+                "summary": "",
+                "published": "",
+            })
+            print(f"   ✅ {text[:70]}")
+
+            if len(items) >= 8:
+                break
+
+    except Exception as e:
+        print(f"   ❌ {e}")
+
+    return items
+
+
+def fetch_harvest_tables():
+    """Парсит таблицы вылова с harvestsummary."""
     print("\n" + "="*70)
-    print("🟠 ШАГ 2: ОСТАЛЬНЫЕ ДАННЫЕ")
+    print("📋 ТАБЛИЦЫ ВЫЛОВА (harvestsummary)")
     print("="*70)
-    
-    market_data = {
-        "alaska": {
-            "production": {
-                "note": "Объёмы переработки (H&G, филе, икра)",
-                "items": [],
-            },
-            "prices": {
-                "ex_vessel": None,          # ex-vessel $/lb
-                "wholesale": None,          # оптовые цены
-                "note": "Цены от Trident, Silver Bay, OBI и др.",
-            },
-            "exports": {
-                "note": "Объёмы экспорта в Японию и другие страны",
-                "items": [],
-            },
-        },
-        "japan": {
-            "import": {
-                "volume_tons": None,        # тонны импорта нерки
-                "value_jpy_million": None,  # стоимость в млн иен
-                "vs_previous_year": None,   # изменение %
-                "note": "Japan Customs данные",
-            },
-            "wholesale_market": {
-                "toyosu_yen_per_kg": None,  # ¥/кг на Toyosu
-                "hokkaido_salted": None,    # солёная нерка в Хоккайдо
-                "note": "Оптовые цены на Toyosu и Hokkaido",
-            },
-            "retail_consumption": {
-                "note": "Ценовые тренды, сезонные факторы (お盆, お歳暮)",
-                "trends": [],
-            },
-        },
-        "analytics": {
-            "usd_jpy_rate": None,
-            "logistics_notes": "Таможенные сборы, логистика",
-            "forecast_notes": "Прогнозы на следующий период",
-        }
+
+    result = {
+        "url": HARVEST_URL,
+        "run_date": None,
+        "season_active": False,
+        "total_run_summary": {},
+        "river_estimates": {},
+        "sockeye_per_delivery": {},
+        "cumulative_catch": 0,
+        "cumulative_escapement": 0,
+        "note": "Межсезонье. Данные появятся с ~22 июня 2026.",
     }
-    
-    # Собираем новости которые могут содержать эту информацию
-    print("Собираю новости о ценах, производстве и японском рынке...")
-    
-    all_news = []
-    for source_name, feed_url in RSS_FEEDS:
-        try:
-            parsed = feedparser.parse(feed_url)
-            for entry in parsed.entries[:20]:
-                title = entry.get("title", "").strip()
-                summary = entry.get("summary", "") or ""
-                
-                # Фильтруем по ключевым словам
-                keywords = ["price", "ex-vessel", "production", "japan", "export", "toyosu", 
-                           "цена", "производ", "японский", "экспорт", "¥"]
-                
-                if any(kw.lower() in (title + summary).lower() for kw in keywords):
-                    all_news.append({
-                        "source": source_name,
-                        "title": title,
-                        "summary": summary[:400],
-                        "link": entry.get("link", ""),
-                    })
-        except:
-            pass
-    
-    if all_news:
-        print(f"  ✅ Собрано новостей: {len(all_news)}")
-        
-        # Извлекаем цены из текста (простой парсинг)
-        for news in all_news:
-            full_text = news["title"] + " " + news["summary"]
-            
-            # ex-vessel цена
-            price_match = re.search(r"\$(\d+\.\d{2})\s*(?:/lb|per pound)", full_text, re.I)
-            if price_match and not market_data["alaska"]["prices"]["ex_vessel"]:
-                market_data["alaska"]["prices"]["ex_vessel"] = f"${price_match.group(1)}/lb"
-            
-            # Японская цена
-            yen_match = re.search(r"¥([\d,]+)\s*(?:/kg|per kg)", full_text, re.I)
-            if yen_match and not market_data["japan"]["wholesale_market"]["toyosu_yen_per_kg"]:
-                market_data["japan"]["wholesale_market"]["toyosu_yen_per_kg"] = f"¥{yen_match.group(1)}/kg"
-        
-        market_data["alaska"]["production"]["items"] = all_news[:5]
-    else:
-        print("  ⚠️  Новостей о ценах и производстве не найдено")
-    
-    return market_data
 
+    resp = http_get(HARVEST_URL)
+    if not resp:
+        return result
 
-# ============================================================
-# ГЛАВНАЯ ФУНКЦИЯ
-# ============================================================
+    soup = BeautifulSoup(resp.text, "html.parser")
+    page_text = soup.get_text()
+
+    # Дата
+    dm = re.search(r"(\d{2}-\d{2}-\d{4})", page_text)
+    if dm:
+        result["run_date"] = dm.group(1)
+        print(f"  📅 Дата: {result['run_date']}")
+
+    tables = soup.find_all("table")
+    print(f"  📊 Таблиц: {len(tables)}")
+
+    for table in tables:
+        headers = [th.get_text(strip=True) for th in table.find_all("th")]
+        if not headers:
+            continue
+
+        rows = table.find_all("tr")[1:]  # без заголовка
+
+        def parse_val(s):
+            s = s.replace(",", "").strip()
+            try:
+                return int(s)
+            except:
+                return s
+
+        # Таблица Total Run Summary
+        if "Catch Daily" in headers and "Catch Cumulative" in headers:
+            print("  ✅ Total Run Summary")
+            for row in rows:
+                cells = [td.get_text(strip=True) for td in row.find_all("td")]
+                if not cells:
+                    continue
+                district = cells[0]
+                data = {}
+                for i, h in enumerate(headers):
+                    if i < len(cells):
+                        data[h] = parse_val(cells[i])
+                key = "TOTALS" if "Totals" in district else district
+                result["total_run_summary"][key] = data
+                # Проверяем есть ли данные
+                cum = data.get("Catch Cumulative", 0)
+                if isinstance(cum, int) and cum > 0:
+                    result["season_active"] = True
+
+            totals = result["total_run_summary"].get("TOTALS", {})
+            result["cumulative_catch"] = totals.get("Catch Cumulative", 0) or 0
+            result["cumulative_escapement"] = totals.get("Escapement Cumulative", 0) or 0
+
+        # River Estimates
+        elif "Escapement Daily" in headers and "In-River Estimate" in headers:
+            print("  ✅ River Estimates")
+            for row in rows:
+                cells = [td.get_text(strip=True) for td in row.find_all("td")]
+                if len(cells) >= 2:
+                    river = cells[0]
+                    data = {h: parse_val(cells[i]) for i, h in enumerate(headers) if i < len(cells)}
+                    if river:
+                        result["river_estimates"][river] = data
+
+        # Sockeye per Delivery
+        elif "Sockeye per Delivery" in headers:
+            print("  ✅ Sockeye per Delivery")
+            for row in rows:
+                cells = [td.get_text(strip=True) for td in row.find_all("td")]
+                if len(cells) >= 2:
+                    result["sockeye_per_delivery"][cells[0]] = parse_val(cells[1])
+
+    if result["season_active"]:
+        result["note"] = f"Bluesheet активен (дата: {result['run_date']})"
+
+    print(f"  Cumulative catch: {result['cumulative_catch']:,}")
+    print(f"  Сезон активен: {result['season_active']}")
+    return result
+
 
 def main():
-    """Главная функция."""
     print("\n" + "="*70)
-    print("🐟 ALASKA SOCKEYE DAILY MONITOR v6.0")
-    print("Структурированный мониторинг как в Notion")
+    print("🐟 ALASKA SOCKEYE MONITOR v8.0 — прямой парсинг")
     print(f"⏰ {datetime.now(timezone.utc).isoformat()}")
     print("="*70)
-    
+
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     HISTORY_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # ШАГ 1: BLUESHEET (ПРИОРИТЕТ)
-    bluesheet = fetch_bluesheet()
-    
-    # ШАГ 2: ОСТАЛЬНЫЕ ДАННЫЕ
-    market = fetch_market_data()
-    
-    # Формируем итоговый JSON с приоритетной структурой
+
+    # Таблицы вылова
+    harvest = fetch_harvest_tables()
+
+    # Новости — прямой парсинг
+    print("\n" + "="*70)
+    print("📰 СОБИРАЮ НОВОСТИ (прямой парсинг)")
+    print("="*70)
+
+    raw_news = []
+
+    # 1. Прямой парсинг сайтов
+    for source in NEWS_SOURCES:
+        items = parse_news_source(source)
+        for item in items:
+            item["source"] = source["name"]
+            raw_news.append(item)
+
+    # 2. ADF&G новости
+    adfg_items = fetch_adfg_news_direct()
+    for item in adfg_items:
+        item["source"] = "ADF&G Bristol Bay"
+        raw_news.append(item)
+
+    print(f"\n📊 Всего новостей до перевода: {len(raw_news)}")
+
+    # Переводим
+    news = []
+    for item in raw_news[:25]:
+        print(f"  🔄 {item['title'][:60]}...")
+        news.append({
+            "source": item["source"],
+            "link": item["link"],
+            "published": item.get("published", ""),
+            "title_en": item["title"],
+            "title_ru": translate_text(item["title"], "ru"),
+            "title_ja": translate_text(item["title"], "ja"),
+            "summary_en": item["summary"],
+            "summary_ru": translate_text(item["summary"], "ru") if item["summary"] else "",
+            "summary_ja": translate_text(item["summary"], "ja") if item["summary"] else "",
+        })
+
+    print(f"✅ Переведено новостей: {len(news)}")
+
+    # Итоговый JSON
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "season": 2026,
@@ -288,56 +398,30 @@ def main():
             "total_run_million_fish": 45.32,
             "harvestable_million_fish": 32.3,
             "range_million_fish": [31.12, 59.52],
+            "uw_asp_forecast_million_fish": 41.5,
+            "source_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf",
         },
-        
-        # ШАГИ МОНИТОРИНГА В ПОРЯДКЕ ПРИОРИТЕТА
-        "monitoring": {
-            "step_1_bluesheet": bluesheet,           # ПРИОРИТЕТ
-            "step_2_market_data": market,            # Остальное
-        },
-        
-        # Статистика
+        "harvest": harvest,
+        "news": news,
         "stats": {
-            "bluesheet_available": bluesheet["available"],
-            "districts_with_data": len(bluesheet["daily_catch_by_district"]),
-            "total_daily_catch": sum(bluesheet["daily_catch_by_district"].values()) or 0,
-            "cumulative_catch": bluesheet["cumulative_catch"],
-            "market_news_count": len(market["alaska"]["production"]["items"]),
+            "season_active": harvest["season_active"],
+            "cumulative_catch": harvest["cumulative_catch"],
+            "news_count": len(news),
         },
     }
-    
+
     # Сохраняем
-    print("\n" + "="*70)
-    print("💾 СОХРАНЯЮ")
-    print("="*70)
-    
     latest_path = DATA_DIR / "latest.json"
-    latest_path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    print(f"✅ {latest_path}")
-    
+    latest_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\n💾 {latest_path}")
+
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    archive_path = HISTORY_DIR / f"{date_str}.json"
-    archive_path.write_text(
-        json.dumps(payload, ensure_ascii=False, indent=2),
-        encoding="utf-8",
+    (HISTORY_DIR / f"{date_str}.json").write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    print(f"✅ {archive_path}")
-    
-    # Финальный отчёт
+
     print("\n" + "="*70)
-    print("📊 ИТОГОВЫЙ ОТЧЁТ")
-    print("="*70)
-    stats = payload["stats"]
-    print(f"✅ Bluesheet доступен: {stats['bluesheet_available']}")
-    print(f"   Районов с данными: {stats['districts_with_data']}")
-    print(f"   Вылов за день: {stats['total_daily_catch']:,} рыб")
-    print(f"   Cumulative: {stats['cumulative_catch']:,} рыб" if stats['cumulative_catch'] else "   Cumulative: —")
-    print(f"   Новостей о ценах/производстве: {stats['market_news_count']}")
-    print("="*70)
-    print("✅ ГОТОВО!")
+    print(f"✅ ГОТОВО! Новостей: {len(news)} | Сезон: {harvest['season_active']}")
     print("="*70)
 
 
