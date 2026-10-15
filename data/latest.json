@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-14T11:30:20.063338+00:00",
+  "generated_at": "2026-10-15T11:07:49.769270+00:00",
   "season": 2026,
   "forecast_2026": {
     "total_run_million_fish": 45.32,
@@ -13,82 +13,11 @@
   },
   "harvest": {
     "url": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.harvestsummary",
-    "run_date": "08-14-2026",
+    "run_date": null,
     "season_active": false,
-    "total_run_summary": {
-      "TOTALS": {
-        "District": "Totals:",
-        "Catch Daily": 0,
-        "Catch Cumulative": 0,
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 0,
-        "In-River Estimate": 0,
-        "Total Run": 0
-      }
-    },
-    "river_estimates": {
-      "Ugashik River": {
-        "District": "Ugashik River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 1703598,
-        "In-River Estimate": 0
-      },
-      "Egegik River": {
-        "District": "Egegik River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 1982724,
-        "In-River Estimate": 0
-      },
-      "Kvichak River": {
-        "District": "Kvichak River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 3080286,
-        "In-River Estimate": 0
-      },
-      "Alagnak River": {
-        "District": "Alagnak River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 1432782,
-        "In-River Estimate": 0
-      },
-      "Naknek River": {
-        "District": "Naknek River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 892326,
-        "In-River Estimate": 0
-      },
-      "Igushik River": {
-        "District": "Igushik River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 551850,
-        "In-River Estimate": 0
-      },
-      "Wood River": {
-        "District": "Wood River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 2586432,
-        "In-River Estimate": 0
-      },
-      "Nushagak River": {
-        "District": "Nushagak River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 3259237,
-        "In-River Estimate": 0
-      },
-      "Togiak River": {
-        "District": "Togiak River",
-        "Escapement Daily": 0,
-        "Escapement Cumulative": 119298,
-        "In-River Estimate": 0
-      }
-    },
-    "sockeye_per_delivery": {
-      "Ugashik": 0,
-      "Egegik": 0,
-      "Naknek-Kvichak": 0,
-      "Nushagak": 0,
-      "Togiak": 6
-    },
+    "total_run_summary": {},
+    "river_estimates": {},
+    "sockeye_per_delivery": {},
     "cumulative_catch": 0,
     "cumulative_escapement": 0,
     "note": "Межсезонье. Данные появятся с ~22 июня 2026."
