@@ -1,0 +1,235 @@
+{
+  "generated_at": "2026-10-29T12:36:52.626962+00:00",
+  "season": 2026,
+  "forecast_2026": {
+    "total_run_million_fish": 45.32,
+    "harvestable_million_fish": 32.3,
+    "range_million_fish": [
+      31.12,
+      59.52
+    ],
+    "uw_asp_forecast_million_fish": 41.5,
+    "source_url": "https://www.adfg.alaska.gov/static/applications/dcfnewsrelease/1745780946.pdf"
+  },
+  "harvest": {
+    "url": "https://www.adfg.alaska.gov/index.cfm?adfg=commercialbyareabristolbay.harvestsummary",
+    "run_date": "08-14-2026",
+    "season_active": false,
+    "total_run_summary": {
+      "TOTALS": {
+        "District": "Totals:",
+        "Catch Daily": 0,
+        "Catch Cumulative": 0,
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 0,
+        "In-River Estimate": 0,
+        "Total Run": 0
+      }
+    },
+    "river_estimates": {
+      "Ugashik River": {
+        "District": "Ugashik River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 1703598,
+        "In-River Estimate": 0
+      },
+      "Egegik River": {
+        "District": "Egegik River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 1982724,
+        "In-River Estimate": 0
+      },
+      "Kvichak River": {
+        "District": "Kvichak River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 3080286,
+        "In-River Estimate": 0
+      },
+      "Alagnak River": {
+        "District": "Alagnak River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 1432782,
+        "In-River Estimate": 0
+      },
+      "Naknek River": {
+        "District": "Naknek River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 892326,
+        "In-River Estimate": 0
+      },
+      "Igushik River": {
+        "District": "Igushik River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 551850,
+        "In-River Estimate": 0
+      },
+      "Wood River": {
+        "District": "Wood River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 2586432,
+        "In-River Estimate": 0
+      },
+      "Nushagak River": {
+        "District": "Nushagak River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 3259237,
+        "In-River Estimate": 0
+      },
+      "Togiak River": {
+        "District": "Togiak River",
+        "Escapement Daily": 0,
+        "Escapement Cumulative": 119298,
+        "In-River Estimate": 0
+      }
+    },
+    "sockeye_per_delivery": {
+      "Ugashik": 0,
+      "Egegik": 0,
+      "Naknek-Kvichak": 0,
+      "Nushagak": 0,
+      "Togiak": 6
+    },
+    "cumulative_catch": 0,
+    "cumulative_escapement": 0,
+    "note": "Межсезонье. Данные появятся с ~22 июня 2026."
+  },
+  "news": [
+    {
+      "source": "KDLG Bristol Bay",
+      "link": "",
+      "published": "",
+      "title_en": "Bristol Bay Fisheries Report",
+      "title_ru": "Bristol Bay Fisheries Report",
+      "title_ja": "Bristol Bay Fisheries Report",
+      "summary_en": "",
+      "summary_ru": "",
+      "summary_ja": ""
+    },
+    {
+      "source": "KDLG Bristol Bay",
+      "link": "",
+      "published": "",
+      "title_en": "Bristol Bay Fisheries Report",
+      "title_ru": "Bristol Bay Fisheries Report",
+      "title_ja": "Bristol Bay Fisheries Report",
+      "summary_en": "",
+      "summary_ru": "",
+      "summary_ja": ""
+    },
+    {
+      "source": "Alaska Beacon",
+      "link": "https://alaskabeacon.com/2023/11/06/salmon-returns-to-alaskas-bristol-bay-expected-to-drop-to-more-normal-levels-next-year/",
+      "published": "",
+      "title_en": "Salmon returns to Alaska’s Bristol Bay expected to drop to more normal levels next year",
+      "title_ru": "Salmon returns to Alaska’s Bristol Bay expected to drop to more normal levels next year",
+      "title_ja": "Salmon returns to Alaska’s Bristol Bay expected to drop to more normal levels next year",
+      "summary_en": "After recent years of record or near-record runs and harvests, Bristol Bay sockeye salmon numbers are expected to return to more average levels next year, according to state biologists. The 2024 Bristol Bay sockeye salmon run is expected to total 39 million fish, with a predicted range between about 25 million and 53 million fish, […]",
+      "summary_ru": "After recent years of record or near-record runs and harvests, Bristol Bay sockeye salmon numbers are expected to return to more average levels next year, according to state biologists. The 2024 Bristol Bay sockeye salmon run is expected to total 39 million fish, with a predicted range between about 25 million and 53 million fish, […]",
+      "summary_ja": "After recent years of record or near-record runs and harvests, Bristol Bay sockeye salmon numbers are expected to return to more average levels next year, according to state biologists. The 2024 Bristol Bay sockeye salmon run is expected to total 39 million fish, with a predicted range between about 25 million and 53 million fish, […]"
+    },
+    {
+      "source": "Alaska Beacon",
+      "link": "https://alaskabeacon.com/2024/09/19/marquee-alaska-sockeye-run-was-bigger-than-expected-but-the-individual-fish-were-small/",
+      "published": "",
+      "title_en": "Marquee Alaska sockeye run was bigger than expected, but the individual fish were small",
+      "title_ru": "Marquee Alaska sockeye run was bigger than expected, but the individual fish were small",
+      "title_ja": "Marquee Alaska sockeye run was bigger than expected, but the individual fish were small",
+      "summary_en": "The world’s largest sockeye salmon run was larger than average this year, but the percentage of those fish that were harvested commercially was lower than normal, and individual fish weighed in at the smallest size on record, the Alaska Department of Fish and Game reported. Bristol Bay’s sockeye salmon run totaled 51.6 million fish, more […]",
+      "summary_ru": "The world’s largest sockeye salmon run was larger than average this year, but the percentage of those fish that were harvested commercially was lower than normal, and individual fish weighed in at the smallest size on record, the Alaska Department of Fish and Game reported. Bristol Bay’s sockeye salmon run totaled 51.6 million fish, more […]",
+      "summary_ja": "The world’s largest sockeye salmon run was larger than average this year, but the percentage of those fish that were harvested commercially was lower than normal, and individual fish weighed in at the smallest size on record, the Alaska Department of Fish and Game reported. Bristol Bay’s sockeye salmon run totaled 51.6 million fish, more […]"
+    },
+    {
+      "source": "Alaska Beacon",
+      "link": "https://alaskabeacon.com/2024/09/09/celebrate-wild-sockeye-salmon-the-harvest-that-powers-bristol-bays-economy-and-feeds-the-world/",
+      "published": "",
+      "title_en": "Celebrate wild sockeye salmon — the harvest that powers Bristol Bay’s economy and feeds the world",
+      "title_ru": "Celebrate wild sockeye salmon — the harvest that powers Bristol Bay’s economy and feeds the world",
+      "title_ja": "Celebrate wild sockeye salmon — the harvest that powers Bristol Bay’s economy and feeds the world",
+      "summary_en": "It’s the time of year again when children have returned to school and seemingly endless daylight gives way to shorter days and cooler nights. In the Bristol Bay region of Alaska, it is viewed less as the end of another summer, and more as the end of another salmon season.  Many weeks of hard work […]",
+      "summary_ru": "It’s the time of year again when children have returned to school and seemingly endless daylight gives way to shorter days and cooler nights. In the Bristol Bay region of Alaska, it is viewed less as the end of another summer, and more as the end of another salmon season.  Many weeks of hard work […]",
+      "summary_ja": "It’s the time of year again when children have returned to school and seemingly endless daylight gives way to shorter days and cooler nights. In the Bristol Bay region of Alaska, it is viewed less as the end of another summer, and more as the end of another salmon season.  Many weeks of hard work […]"
+    },
+    {
+      "source": "Alaska Beacon",
+      "link": "https://alaskabeacon.com/2022/11/12/despite-extremes-on-both-ends-alaskas-total-commercial-salmon-catch-was-about-average/",
+      "published": "",
+      "title_en": "Despite extremes on both ends, Alaska’s total commercial salmon catch was about average",
+      "title_ru": "Despite extremes on both ends, Alaska’s total commercial salmon catch was about average",
+      "title_ja": "Despite extremes on both ends, Alaska’s total commercial salmon catch was about average",
+      "summary_en": "The trends in Alaska salmon headed in opposite directions in 2022, sometimes extremely so, but ended up meeting in the middle. The total commercial salmon harvest for the year wound up being close to historic averages for total fish and value, according to a preliminary summary report released by the Alaska Department of Fish and […]",
+      "summary_ru": "The trends in Alaska salmon headed in opposite directions in 2022, sometimes extremely so, but ended up meeting in the middle. The total commercial salmon harvest for the year wound up being close to historic averages for total fish and value, according to a preliminary summary report released by the Alaska Department of Fish and […]",
+      "summary_ja": "The trends in Alaska salmon headed in opposite directions in 2022, sometimes extremely so, but ended up meeting in the middle. The total commercial salmon harvest for the year wound up being close to historic averages for total fish and value, according to a preliminary summary report released by the Alaska Department of Fish and […]"
+    },
+    {
+      "source": "Alaska Beacon",
+      "link": "https://alaskabeacon.com/2024/11/12/strong-sockeye-salmon-return-expected-next-year-in-alaskas-bristol-bay-region-biologists-say/",
+      "published": "",
+      "title_en": "Strong sockeye salmon return expected next year in Alaska’s Bristol Bay region, biologists say",
+      "title_ru": "Strong sockeye salmon return expected next year in Alaska’s Bristol Bay region, biologists say",
+      "title_ja": "Strong sockeye salmon return expected next year in Alaska’s Bristol Bay region, biologists say",
+      "summary_en": "The world’s biggest sockeye salmon run will be larger than average next year, state biologists have forecasted. The Bristol Bay sockeye run is expected to total 51.21 million fish in 2025, according to the Alaska Department of Fish and Game’s preseason forecast, issued last week. That is 38% more than the long-term average of 37.07 […]",
+      "summary_ru": "The world’s biggest sockeye salmon run will be larger than average next year, state biologists have forecasted. The Bristol Bay sockeye run is expected to total 51.21 million fish in 2025, according to the Alaska Department of Fish and Game’s preseason forecast, issued last week. That is 38% more than the long-term average of 37.07 […]",
+      "summary_ja": "The world’s biggest sockeye salmon run will be larger than average next year, state biologists have forecasted. The Bristol Bay sockeye run is expected to total 51.21 million fish in 2025, according to the Alaska Department of Fish and Game’s preseason forecast, issued last week. That is 38% more than the long-term average of 37.07 […]"
+    },
+    {
+      "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/usda-harvest-fuel-relief-program-what-bristol-bay-drift-fishermen-need-to-know/",
+      "published": "",
+      "title_en": "USDA Harvest Fuel Relief Program: What Bristol Bay Drift Fishermen Need to Know",
+      "title_ru": "USDA Harvest Fuel Relief Program: What Bristol Bay Drift Fishermen Need to Know",
+      "title_ja": "USDA Harvest Fuel Relief Program: What Bristol Bay Drift Fishermen Need to Know",
+      "summary_en": "On October 19, 2026, President Donald J. Trump and U.S. Secretary of Agriculture Brooke L. Rollins announced the Harvest Fuel Relief Program. This post explains what was announced, what it may mean for Bristol Bay drift fishermen, and how you can submit your fuel cost information to USDA now. BBRSDA has put together a step-by-step […]",
+      "summary_ru": "On October 19, 2026, President Donald J. Trump and U.S. Secretary of Agriculture Brooke L. Rollins announced the Harvest Fuel Relief Program. This post explains what was announced, what it may mean for Bristol Bay drift fishermen, and how you can submit your fuel cost information to USDA now. BBRSDA has put together a step-by-step […]",
+      "summary_ja": "On October 19, 2026, President Donald J. Trump and U.S. Secretary of Agriculture Brooke L. Rollins announced the Harvest Fuel Relief Program. This post explains what was announced, what it may mean for Bristol Bay drift fishermen, and how you can submit your fuel cost information to USDA now. BBRSDA has put together a step-by-step […]"
+    },
+    {
+      "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/2026-bristol-bay-salmon-season-summary/",
+      "published": "",
+      "title_en": "2026 Bristol Bay Salmon Season Summary",
+      "title_ru": "2026 Bristol Bay Salmon Season Summary",
+      "title_ja": "2026 Bristol Bay Salmon Season Summary",
+      "summary_en": "ADF&G published the 2026 Bristol Bay Salmon Season Summary on September 22nd, and published an updated 2026 Bristol Bay Salmon Season Summary on September 29.   The following is an overview of the 2026 Bristol Bay commercial salmon season. All data are preliminary. The 2026 inshore Bristol Bay sockeye salmon run of 45.7 million fish […]",
+      "summary_ru": "ADF&G published the 2026 Bristol Bay Salmon Season Summary on September 22nd, and published an updated 2026 Bristol Bay Salmon Season Summary on September 29.   The following is an overview of the 2026 Bristol Bay commercial salmon season. All data are preliminary. The 2026 inshore Bristol Bay sockeye salmon run of 45.7 million fish […]",
+      "summary_ja": "ADF&G published the 2026 Bristol Bay Salmon Season Summary on September 22nd, and published an updated 2026 Bristol Bay Salmon Season Summary on September 29.   The following is an overview of the 2026 Bristol Bay commercial salmon season. All data are preliminary. The 2026 inshore Bristol Bay sockeye salmon run of 45.7 million fish […]"
+    },
+    {
+      "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/bbrsda-is-hiring-a-program-coordinator/",
+      "published": "",
+      "title_en": "BBRSDA is Hiring a Program Coordinator",
+      "title_ru": "BBRSDA is Hiring a Program Coordinator",
+      "title_ja": "BBRSDA is Hiring a Program Coordinator",
+      "summary_en": "BBRSDA is no longer accepting applications for this position. Thank you for your interest. The Bristol Bay Regional Seafood Development Association (BBRSDA) is seeking a Program Coordinator to help maximize the value of the Bristol Bay salmon fishery for our members by advancing key marketing, sustainability, quality, and outreach initiatives.  Job Summary The Bristol Bay […]",
+      "summary_ru": "BBRSDA is no longer accepting applications for this position. Thank you for your interest. The Bristol Bay Regional Seafood Development Association (BBRSDA) is seeking a Program Coordinator to help maximize the value of the Bristol Bay salmon fishery for our members by advancing key marketing, sustainability, quality, and outreach initiatives.  Job Summary The Bristol Bay […]",
+      "summary_ja": "BBRSDA is no longer accepting applications for this position. Thank you for your interest. The Bristol Bay Regional Seafood Development Association (BBRSDA) is seeking a Program Coordinator to help maximize the value of the Bristol Bay salmon fishery for our members by advancing key marketing, sustainability, quality, and outreach initiatives.  Job Summary The Bristol Bay […]"
+    },
+    {
+      "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/bristol-bay-regional-seafood-development-association-receives-noaa-saltonstall-kennedy-grant-to-expand-food-service-market-for-wild-alaska-sockeye-salmon/",
+      "published": "",
+      "title_en": "Bristol Bay Regional Seafood Development Association Receives NOAA Saltonstall-Kennedy Grant to Expand Food Service Market for Wild Alaska Sockeye Salmon",
+      "title_ru": "Bristol Bay Regional Seafood Development Association Receives NOAA Saltonstall-Kennedy Grant to Expand Food Service Market for Wild Alaska Sockeye Salmon",
+      "title_ja": "Bristol Bay Regional Seafood Development Association Receives NOAA Saltonstall-Kennedy Grant to Expand Food Service Market for Wild Alaska Sockeye Salmon",
+      "summary_en": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”",
+      "summary_ru": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”",
+      "summary_ja": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”"
+    },
+    {
+      "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/2027-preliminary-forecast-uw/",
+      "published": "",
+      "title_en": "2027 Preliminary Forecast – UW",
+      "title_ru": "2027 Preliminary Forecast – UW",
+      "title_ja": "2027 Preliminary Forecast – UW",
+      "summary_en": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026).",
+      "summary_ru": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026).",
+      "summary_ja": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026)."
+    }
+  ],
+  "stats": {
+    "season_active": false,
+    "cumulative_catch": 0,
+    "news_count": 12
+  }
+}
