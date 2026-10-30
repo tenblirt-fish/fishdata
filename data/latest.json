@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-29T12:36:52.626962+00:00",
+  "generated_at": "2026-10-30T12:28:03.598973+00:00",
   "season": 2026,
   "forecast_2026": {
     "total_run_million_fish": 45.32,
@@ -173,6 +173,17 @@
     },
     {
       "source": "BBRSDA",
+      "link": "https://www.bbrsda.com/bbrsda-receives-grant-award-for-sonar-salmon-counting-project-on-the-naknek-river/",
+      "published": "",
+      "title_en": "BBRSDA Receives Grant Award for Sonar Salmon Counting Project on the Naknek River",
+      "title_ru": "BBRSDA Receives Grant Award for Sonar Salmon Counting Project on the Naknek River",
+      "title_ja": "BBRSDA Receives Grant Award for Sonar Salmon Counting Project on the Naknek River",
+      "summary_en": "FOR IMMEDIATE RELEASE BBRSDA Launches Sonar Salmon Counting Project on the Naknek River Anchorage, Alaska — The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $188,268 from the National Fish and Wildlife Foundation (NFWF) through its Electronic Monitoring and Reporting Grant Program to count salmon using sonar technology on the Naknek River near […]",
+      "summary_ru": "FOR IMMEDIATE RELEASE BBRSDA Launches Sonar Salmon Counting Project on the Naknek River Anchorage, Alaska — The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $188,268 from the National Fish and Wildlife Foundation (NFWF) through its Electronic Monitoring and Reporting Grant Program to count salmon using sonar technology on the Naknek River near […]",
+      "summary_ja": "FOR IMMEDIATE RELEASE BBRSDA Launches Sonar Salmon Counting Project on the Naknek River Anchorage, Alaska — The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $188,268 from the National Fish and Wildlife Foundation (NFWF) through its Electronic Monitoring and Reporting Grant Program to count salmon using sonar technology on the Naknek River near […]"
+    },
+    {
+      "source": "BBRSDA",
       "link": "https://www.bbrsda.com/usda-harvest-fuel-relief-program-what-bristol-bay-drift-fishermen-need-to-know/",
       "published": "",
       "title_en": "USDA Harvest Fuel Relief Program: What Bristol Bay Drift Fishermen Need to Know",
@@ -214,17 +225,6 @@
       "summary_en": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”",
       "summary_ru": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”",
       "summary_ja": "FOR IMMEDIATE RELEASE:  The Bristol Bay Regional Seafood Development Association (BBRSDA) has been awarded $499,400 from NOAA Fisheries’ Saltonstall-Kennedy (S-K) grant program to fund a new project called “Wild Alaska Sockeye Salmon in Food Service.”"
-    },
-    {
-      "source": "BBRSDA",
-      "link": "https://www.bbrsda.com/2027-preliminary-forecast-uw/",
-      "published": "",
-      "title_en": "2027 Preliminary Forecast – UW",
-      "title_ru": "2027 Preliminary Forecast – UW",
-      "title_ja": "2027 Preliminary Forecast – UW",
-      "summary_en": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026).",
-      "summary_ru": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026).",
-      "summary_ja": "This brief report from UW FRI provides a preliminary forecast for Bristol Bay sockeye salmon abundance for 2027, based upon data available at the time of the last Alaska Department of Fish and Game (ADF&G) daily inseason release (August 2026)."
     }
   ],
   "stats": {
