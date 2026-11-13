@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-12T14:53:59.695396+00:00",
+  "generated_at": "2026-11-13T14:18:10.838594+00:00",
   "season": 2026,
   "forecast_2026": {
     "total_run_million_fish": 45.32,
@@ -170,99 +170,11 @@
       "summary_en": "Alaska fishery biologists expect next year’s run of sockeye salmon in Bristol Bay — site of the world’s largest sockeye runs — to be about normal. The forecast for 2027, released by the Alaska Department of Fish and Game last week, estimated a return of 49.31 million sockeye salmon in the coming summer season. That […]",
       "summary_ru": "Alaska fishery biologists expect next year’s run of sockeye salmon in Bristol Bay — site of the world’s largest sockeye runs — to be about normal. The forecast for 2027, released by the Alaska Department of Fish and Game last week, estimated a return of 49.31 million sockeye salmon in the coming summer season. That […]",
       "summary_ja": "Alaska fishery biologists expect next year’s run of sockeye salmon in Bristol Bay — site of the world’s largest sockeye runs — to be about normal. The forecast for 2027, released by the Alaska Department of Fish and Game last week, estimated a return of 49.31 million sockeye salmon in the coming summer season. That […]"
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/sf/PU/",
-      "published": "",
-      "title_en": "Online Harvest Reporting",
-      "title_ru": "Online Harvest Reporting",
-      "title_ja": "Online Harvest Reporting",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/sf/PU/",
-      "published": "",
-      "title_en": "Online Harvest Reporting",
-      "title_ru": "Online Harvest Reporting",
-      "title_ja": "Online Harvest Reporting",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=akssf.main",
-      "published": "",
-      "title_en": "Alaska Sustainable Salmon Fund",
-      "title_ru": "Alaska Sustainable Salmon Fund",
-      "title_ja": "Alaska Sustainable Salmon Fund",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=wassip.main",
-      "published": "",
-      "title_en": "Western Alaska Salmon Stock Identification Program (WASSIP)",
-      "title_ru": "Western Alaska Salmon Stock Identification Program (WASSIP)",
-      "title_ja": "Western Alaska Salmon Stock Identification Program (WASSIP)",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=chinookinitiative.main",
-      "published": "",
-      "title_en": "Chinook Salmon Research Initiative",
-      "title_ru": "Chinook Salmon Research Initiative",
-      "title_ja": "Chinook Salmon Research Initiative",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://secure.wildlife.alaska.gov/ePermit",
-      "published": "",
-      "title_en": "Online General Season & Registration Permits",
-      "title_ru": "Online General Season & Registration Permits",
-      "title_ja": "Online General Season & Registration Permits",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=huntlicense.general",
-      "published": "",
-      "title_en": "General Season Permit Information",
-      "title_ru": "General Season Permit Information",
-      "title_ja": "General Season Permit Information",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
-    },
-    {
-      "source": "ADF&G Bristol Bay",
-      "link": "https://www.adfg.alaska.gov/index.cfm?adfg=huntlicense.cultural",
-      "published": "",
-      "title_en": "Cultural and Subsistence Harvest Permits",
-      "title_ru": "Cultural and Subsistence Harvest Permits",
-      "title_ja": "Cultural and Subsistence Harvest Permits",
-      "summary_en": "",
-      "summary_ru": "",
-      "summary_ja": ""
     }
   ],
   "stats": {
     "season_active": false,
     "cumulative_catch": 0,
-    "news_count": 15
+    "news_count": 7
   }
 }
